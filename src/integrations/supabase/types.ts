@@ -77,6 +77,45 @@ export type Database = {
         }
         Relationships: []
       }
+      wallets: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          has_biometric: boolean | null
+          id: string
+          pin_hash: string | null
+          seed_phrase_encrypted: string | null
+          status: Database["public"]["Enums"]["wallet_status"]
+          updated_at: string | null
+          user_id: string
+          wallet_type: Database["public"]["Enums"]["wallet_type"]
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          has_biometric?: boolean | null
+          id?: string
+          pin_hash?: string | null
+          seed_phrase_encrypted?: string | null
+          status?: Database["public"]["Enums"]["wallet_status"]
+          updated_at?: string | null
+          user_id: string
+          wallet_type?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          has_biometric?: boolean | null
+          id?: string
+          pin_hash?: string | null
+          seed_phrase_encrypted?: string | null
+          status?: Database["public"]["Enums"]["wallet_status"]
+          updated_at?: string | null
+          user_id?: string
+          wallet_type?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -93,6 +132,8 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user" | "seller"
       user_type: "cliente" | "lojista"
+      wallet_status: "active" | "locked" | "pending_setup"
+      wallet_type: "internal" | "keplr" | "imported"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -222,6 +263,8 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user", "seller"],
       user_type: ["cliente", "lojista"],
+      wallet_status: ["active", "locked", "pending_setup"],
+      wallet_type: ["internal", "keplr", "imported"],
     },
   },
 } as const

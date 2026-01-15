@@ -10,8 +10,7 @@ export default function Success() {
   const { profile } = useAuth();
 
   const handleSetupWallet = () => {
-    // Placeholder - Fase 2
-    navigate('/app', { replace: true });
+    navigate('/app/wallet/setup', { replace: true });
   };
 
   const handleSkipWallet = () => {

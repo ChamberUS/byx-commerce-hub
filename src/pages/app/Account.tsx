@@ -77,7 +77,10 @@ export default function Account() {
       {/* Content */}
       <div className="px-4 py-4 space-y-6">
         {/* Profile Card */}
-        <div className="rounded-2xl bg-card border">
+        <div 
+          className="rounded-2xl bg-card border cursor-pointer hover:border-primary/50 transition-colors"
+          onClick={() => navigate('/app/account/edit')}
+        >
           <ProfileCard
             nome={profile?.nome}
             email={profile?.email}
