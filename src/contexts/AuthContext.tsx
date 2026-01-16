@@ -95,7 +95,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithOtp = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/auth/verify`;
+    // Redirect to complete-profile after magic link auth
+    const redirectUrl = `${window.location.origin}/auth/complete-profile`;
     
     const { error } = await supabase.auth.signInWithOtp({
       email,

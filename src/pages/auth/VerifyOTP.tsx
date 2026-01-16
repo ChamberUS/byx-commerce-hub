@@ -1,23 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Loader2, Mail, CheckCircle } from 'lucide-react';
 import { AuthLayout } from '@/components/layout/AuthLayout';
-import { OTPInput } from '@/components/auth/OTPInput';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 export default function VerifyOTP() {
   const navigate = useNavigate();
-  const { verifyOtp, signInWithOtp } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { signInWithOtp, user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
-  const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
-  const [error, setError] = useState(false);
   const [countdown, setCountdown] = useState(60);
+  const [emailSent, setEmailSent] = useState(true);
 
   const email = sessionStorage.getItem('byx_auth_email');
+
+  // Check if user arrived via magic link (already authenticated)
+  useEffect(() => {
+    if (!authLoading && user) {
+      // User is authenticated, redirect based on profile status
+      if (profile?.onboarding_completo) {
+        navigate('/app/home', { replace: true });
+      } else {
+        navigate('/auth/complete-profile', { replace: true });
+      }
+    }
+  }, [user, profile, authLoading, navigate]);
 
   useEffect(() => {
     if (!email) {
@@ -32,44 +43,10 @@ export default function VerifyOTP() {
     }
   }, [countdown]);
 
-  const handleComplete = async (code: string) => {
-    if (!email) return;
-
-    setError(false);
-    setLoading(true);
-
-    try {
-      const { error: verifyError } = await verifyOtp(email, code);
-
-      if (verifyError) {
-        throw verifyError;
-      }
-
-      // Check if profile type was selected
-      const profileType = sessionStorage.getItem('byx_profile_type');
-      if (profileType) {
-        sessionStorage.removeItem('byx_profile_type');
-        // Profile will be updated in complete-profile
-      }
-
-      navigate('/auth/complete-profile', { replace: true });
-    } catch (err: any) {
-      setError(true);
-      toast({
-        variant: 'destructive',
-        title: 'Código inválido',
-        description: 'Verifique o código e tente novamente.',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleResend = async () => {
     if (!email || countdown > 0) return;
 
     setResendLoading(true);
-    setError(false);
 
     try {
       const { error: sendError } = await signInWithOtp(email);
@@ -79,9 +56,10 @@ export default function VerifyOTP() {
       }
 
       setCountdown(60);
+      setEmailSent(true);
       toast({
-        title: 'Código reenviado',
-        description: 'Verifique seu email.',
+        title: 'Email reenviado',
+        description: 'Verifique sua caixa de entrada.',
       });
     } catch (err: any) {
       toast({
@@ -97,6 +75,16 @@ export default function VerifyOTP() {
   const maskedEmail = email
     ? email.replace(/(.{2})(.*)(@.*)/, '$1***$3')
     : '';
+
+  if (authLoading) {
+    return (
+      <AuthLayout>
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout>
@@ -114,53 +102,63 @@ export default function VerifyOTP() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 px-6 pb-8">
+        <div className="flex-1 px-6 pb-8 flex flex-col items-center justify-center">
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+            <Mail className="h-10 w-10 text-primary" />
+          </div>
+
           <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-foreground">
-              Digite o código
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              Verifique seu email
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Enviamos um código de 6 dígitos para{' '}
-              <span className="font-medium text-foreground">{maskedEmail}</span>
+            <p className="text-muted-foreground">
+              Enviamos um link de acesso para{' '}
+              <span className="font-medium text-foreground block mt-1">
+                {maskedEmail}
+              </span>
             </p>
           </div>
 
-          <div className="space-y-8">
-            <OTPInput
-              onComplete={handleComplete}
-              disabled={loading}
-              error={error}
-            />
-
-            {loading && (
-              <div className="flex justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <div className="bg-muted/50 rounded-2xl p-6 mb-8 max-w-sm">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">Como acessar:</p>
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Abra seu email</li>
+                  <li>Clique no link "Confirmar email"</li>
+                  <li>Você será redirecionado automaticamente</li>
+                </ol>
               </div>
-            )}
-
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                Não recebeu o código?
-              </p>
-              <Button
-                variant="link"
-                onClick={handleResend}
-                disabled={countdown > 0 || resendLoading}
-                className="text-primary"
-              >
-                {resendLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Reenviando...
-                  </>
-                ) : countdown > 0 ? (
-                  `Reenviar em ${countdown}s`
-                ) : (
-                  'Reenviar código'
-                )}
-              </Button>
             </div>
           </div>
+
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground mb-2">
+              Não recebeu o email?
+            </p>
+            <Button
+              variant="link"
+              onClick={handleResend}
+              disabled={countdown > 0 || resendLoading}
+              className="text-primary"
+            >
+              {resendLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Reenviando...
+                </>
+              ) : countdown > 0 ? (
+                `Reenviar em ${countdown}s`
+              ) : (
+                'Reenviar email'
+              )}
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground mt-6 text-center">
+            Verifique também a pasta de spam ou lixo eletrônico
+          </p>
         </div>
       </div>
     </AuthLayout>
