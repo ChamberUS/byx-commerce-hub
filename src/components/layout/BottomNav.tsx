@@ -1,17 +1,28 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, Package, Wallet, User } from 'lucide-react';
+import { Home, Search, Package, Wallet, User, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { path: '/app', icon: Home, label: 'Início' },
-  { path: '/app/search', icon: Search, label: 'Buscar' },
-  { path: '/app/orders', icon: Package, label: 'Pedidos' },
-  { path: '/app/wallet', icon: Wallet, label: 'Carteira' },
-  { path: '/app/account', icon: User, label: 'Conta' },
-];
+import { useMyStore } from '@/hooks/use-store';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function BottomNav() {
   const location = useLocation();
+  const { profile } = useAuth();
+  const { data: myStore } = useMyStore();
+
+  const navItems = [
+    { path: '/app', icon: Home, label: 'Início' },
+    { path: '/app/search', icon: Search, label: 'Buscar' },
+    { path: '/app/orders', icon: Package, label: 'Pedidos' },
+    { path: '/app/wallet', icon: Wallet, label: 'Carteira' },
+    { path: '/app/account', icon: User, label: 'Conta' },
+  ];
+
+  // Add seller tab for lojistas with stores
+  if (myStore) {
+    navItems.splice(4, 0, { path: '/app/seller', icon: Store, label: 'Loja' });
+    // Remove account to keep 5 items
+    navItems.pop();
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
@@ -29,7 +40,7 @@ export function BottomNav() {
               to={item.path}
               className={cn(
                 'flex flex-col items-center justify-center gap-0.5 py-2 px-3 rounded-xl',
-                'transition-colors min-w-[64px]',
+                'transition-colors min-w-[56px]',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
@@ -41,7 +52,7 @@ export function BottomNav() {
                   isActive && 'scale-110'
                 )}
               />
-              <span className="text-xs font-medium">{item.label}</span>
+              <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           );
         })}

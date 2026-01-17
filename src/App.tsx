@@ -27,6 +27,16 @@ import Privacy from "./pages/app/Privacy";
 import Wallet from "./pages/app/Wallet";
 import WalletSetup from "./pages/app/WalletSetup";
 
+// Marketplace pages
+import SearchPage from "./pages/app/Search";
+import ProductDetail from "./pages/app/ProductDetail";
+import StorePage from "./pages/app/StorePage";
+import FavoritesPage from "./pages/app/Favorites";
+
+// Legal pages
+import LegalTerms from "./pages/legal/Terms";
+import LegalPrivacy from "./pages/legal/Privacy";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,16 +58,30 @@ const App = () => (
               <Route path="/auth/complete-profile" element={<AuthGuard requireAuth><CompleteProfile /></AuthGuard>} />
               <Route path="/auth/terms" element={<AuthGuard requireAuth><Terms /></AuthGuard>} />
               <Route path="/auth/success" element={<AuthGuard requireAuth><Success /></AuthGuard>} />
+              
+              {/* Main App */}
               <Route path="/app" element={<AuthGuard requireAuth requireOnboarding><Home /></AuthGuard>} />
+              <Route path="/app/search" element={<AuthGuard requireAuth requireOnboarding><SearchPage /></AuthGuard>} />
+              <Route path="/app/product/:id" element={<AuthGuard requireAuth requireOnboarding><ProductDetail /></AuthGuard>} />
+              <Route path="/app/store/:slug" element={<AuthGuard requireAuth requireOnboarding><StorePage /></AuthGuard>} />
+              <Route path="/app/favorites" element={<AuthGuard requireAuth requireOnboarding><FavoritesPage /></AuthGuard>} />
+              <Route path="/app/orders" element={<AuthGuard requireAuth requireOnboarding><Home /></AuthGuard>} />
+              
+              {/* Account */}
               <Route path="/app/account" element={<AuthGuard requireAuth requireOnboarding><Account /></AuthGuard>} />
               <Route path="/app/account/edit" element={<AuthGuard requireAuth requireOnboarding><EditProfile /></AuthGuard>} />
               <Route path="/app/account/security" element={<AuthGuard requireAuth requireOnboarding><Security /></AuthGuard>} />
               <Route path="/app/account/notifications" element={<AuthGuard requireAuth requireOnboarding><Notifications /></AuthGuard>} />
               <Route path="/app/account/privacy" element={<AuthGuard requireAuth requireOnboarding><Privacy /></AuthGuard>} />
+              
+              {/* Wallet */}
               <Route path="/app/wallet" element={<AuthGuard requireAuth requireOnboarding><Wallet /></AuthGuard>} />
               <Route path="/app/wallet/setup" element={<AuthGuard requireAuth requireOnboarding><WalletSetup /></AuthGuard>} />
-              <Route path="/app/search" element={<AuthGuard requireAuth requireOnboarding><Home /></AuthGuard>} />
-              <Route path="/app/orders" element={<AuthGuard requireAuth requireOnboarding><Home /></AuthGuard>} />
+              
+              {/* Legal */}
+              <Route path="/legal/terms" element={<LegalTerms />} />
+              <Route path="/legal/privacy" element={<LegalPrivacy />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </WalletProvider>
