@@ -32,6 +32,14 @@ import SearchPage from "./pages/app/Search";
 import ProductDetail from "./pages/app/ProductDetail";
 import StorePage from "./pages/app/StorePage";
 import FavoritesPage from "./pages/app/Favorites";
+import Orders from "./pages/app/Orders";
+import ChatList from "./pages/app/ChatList";
+
+// Seller pages
+import SellerDashboard from "./pages/seller/Dashboard";
+import CreateStore from "./pages/seller/CreateStore";
+import EditStore from "./pages/seller/EditStore";
+import SellerProducts from "./pages/seller/Products";
 
 // Legal pages
 import LegalTerms from "./pages/legal/Terms";
@@ -65,7 +73,8 @@ const App = () => (
               <Route path="/app/product/:id" element={<AuthGuard requireAuth requireOnboarding><ProductDetail /></AuthGuard>} />
               <Route path="/app/store/:slug" element={<AuthGuard requireAuth requireOnboarding><StorePage /></AuthGuard>} />
               <Route path="/app/favorites" element={<AuthGuard requireAuth requireOnboarding><FavoritesPage /></AuthGuard>} />
-              <Route path="/app/orders" element={<AuthGuard requireAuth requireOnboarding><Home /></AuthGuard>} />
+              <Route path="/app/orders" element={<AuthGuard requireAuth requireOnboarding><Orders /></AuthGuard>} />
+              <Route path="/app/chat" element={<AuthGuard requireAuth requireOnboarding><ChatList /></AuthGuard>} />
               
               {/* Account */}
               <Route path="/app/account" element={<AuthGuard requireAuth requireOnboarding><Account /></AuthGuard>} />
@@ -77,6 +86,12 @@ const App = () => (
               {/* Wallet */}
               <Route path="/app/wallet" element={<AuthGuard requireAuth requireOnboarding><Wallet /></AuthGuard>} />
               <Route path="/app/wallet/setup" element={<AuthGuard requireAuth requireOnboarding><WalletSetup /></AuthGuard>} />
+              
+              {/* Seller Hub */}
+              <Route path="/app/store" element={<AuthGuard requireAuth requireOnboarding><SellerDashboard /></AuthGuard>} />
+              <Route path="/app/store/create" element={<AuthGuard requireAuth requireOnboarding><CreateStore /></AuthGuard>} />
+              <Route path="/app/store/edit" element={<AuthGuard requireAuth requireOnboarding><EditStore /></AuthGuard>} />
+              <Route path="/app/store/products" element={<AuthGuard requireAuth requireOnboarding><SellerProducts /></AuthGuard>} />
               
               {/* Legal */}
               <Route path="/legal/terms" element={<LegalTerms />} />
