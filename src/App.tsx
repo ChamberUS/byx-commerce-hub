@@ -33,13 +33,19 @@ import ProductDetail from "./pages/app/ProductDetail";
 import StorePage from "./pages/app/StorePage";
 import FavoritesPage from "./pages/app/Favorites";
 import Orders from "./pages/app/Orders";
+import OrderDetail from "./pages/app/OrderDetail";
 import ChatList from "./pages/app/ChatList";
+import ChatRoom from "./pages/app/ChatRoom";
+import Checkout from "./pages/app/Checkout";
 
 // Seller pages
 import SellerDashboard from "./pages/seller/Dashboard";
 import CreateStore from "./pages/seller/CreateStore";
 import EditStore from "./pages/seller/EditStore";
 import SellerProducts from "./pages/seller/Products";
+import ProductForm from "./pages/seller/ProductForm";
+import StoreOrders from "./pages/seller/StoreOrders";
+import QuickReplies from "./pages/seller/QuickReplies";
 
 // Legal pages
 import LegalTerms from "./pages/legal/Terms";
@@ -74,7 +80,10 @@ const App = () => (
               <Route path="/app/store/:slug" element={<AuthGuard requireAuth requireOnboarding><StorePage /></AuthGuard>} />
               <Route path="/app/favorites" element={<AuthGuard requireAuth requireOnboarding><FavoritesPage /></AuthGuard>} />
               <Route path="/app/orders" element={<AuthGuard requireAuth requireOnboarding><Orders /></AuthGuard>} />
+              <Route path="/app/orders/:id" element={<AuthGuard requireAuth requireOnboarding><OrderDetail /></AuthGuard>} />
+              <Route path="/app/checkout" element={<AuthGuard requireAuth requireOnboarding><Checkout /></AuthGuard>} />
               <Route path="/app/chat" element={<AuthGuard requireAuth requireOnboarding><ChatList /></AuthGuard>} />
+              <Route path="/app/chat/:conversationId" element={<AuthGuard requireAuth requireOnboarding><ChatRoom /></AuthGuard>} />
               
               {/* Account */}
               <Route path="/app/account" element={<AuthGuard requireAuth requireOnboarding><Account /></AuthGuard>} />
@@ -92,6 +101,10 @@ const App = () => (
               <Route path="/app/store/create" element={<AuthGuard requireAuth requireOnboarding><CreateStore /></AuthGuard>} />
               <Route path="/app/store/edit" element={<AuthGuard requireAuth requireOnboarding><EditStore /></AuthGuard>} />
               <Route path="/app/store/products" element={<AuthGuard requireAuth requireOnboarding><SellerProducts /></AuthGuard>} />
+              <Route path="/app/store/products/new" element={<AuthGuard requireAuth requireOnboarding><ProductForm /></AuthGuard>} />
+              <Route path="/app/store/products/:id/edit" element={<AuthGuard requireAuth requireOnboarding><ProductForm /></AuthGuard>} />
+              <Route path="/app/store/orders" element={<AuthGuard requireAuth requireOnboarding><StoreOrders /></AuthGuard>} />
+              <Route path="/app/store/quick-replies" element={<AuthGuard requireAuth requireOnboarding><QuickReplies /></AuthGuard>} />
               
               {/* Legal */}
               <Route path="/legal/terms" element={<LegalTerms />} />
