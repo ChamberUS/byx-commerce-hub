@@ -146,7 +146,8 @@ export default function ChatRoom() {
     try {
       await respondToOffer.mutateAsync({
         offerId,
-        status: action,
+        conversationId: conversationId!,
+        action: action === 'accepted' ? 'accept' : 'reject',
         counterAmount,
       });
       toast({ title: action === 'accepted' ? 'Oferta aceita!' : 'Oferta rejeitada' });
