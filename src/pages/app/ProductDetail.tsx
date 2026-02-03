@@ -104,6 +104,24 @@ export default function ProductDetail() {
     }
   };
 
+  const handleBuyNow = () => {
+    if (!user) {
+      toast({ title: 'Faça login para comprar', variant: 'destructive' });
+      navigate('/auth/login');
+      return;
+    }
+    
+    sessionStorage.setItem('checkout_product', JSON.stringify({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      store_id: product.store?.id,
+      image: images[0]?.url || '/placeholder.svg'
+    }));
+    
+    navigate('/app/checkout');
+  };
+
   const storeInitials = product.store?.name
     .split(' ')
     .map((n) => n[0])
@@ -226,7 +244,7 @@ export default function ProductDetail() {
 
             {/* Actions */}
             <div className="flex gap-3 mb-6">
-              <Button className="flex-1 h-12 rounded-xl" size="lg">
+              <Button className="flex-1 h-12 rounded-xl" size="lg" onClick={handleBuyNow}>
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 Comprar Agora
               </Button>

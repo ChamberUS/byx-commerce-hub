@@ -54,6 +54,7 @@ export interface Message {
     amount: number;
     status: 'pending' | 'accepted' | 'rejected' | 'countered' | 'expired' | 'cancelled';
     counter_amount: number | null;
+    message: string | null;
   };
 }
 

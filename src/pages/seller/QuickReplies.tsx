@@ -100,6 +100,7 @@ export default function QuickRepliesPage() {
       if (editingReply) {
         await updateQuickReply.mutateAsync({
           id: editingReply.id,
+          storeId: store.id,
           title: title.trim(),
           content: content.trim(),
         });
@@ -122,7 +123,7 @@ export default function QuickRepliesPage() {
     if (!deleteReplyId) return;
     
     try {
-      await deleteQuickReply.mutateAsync(deleteReplyId);
+      await deleteQuickReply.mutateAsync({ id: deleteReplyId, storeId: store.id });
       toast({ title: 'Resposta excluída' });
       setDeleteReplyId(null);
     } catch {
