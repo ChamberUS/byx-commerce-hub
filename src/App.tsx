@@ -104,6 +104,7 @@ const App = () => (
               <Route path="/app/store/products/new" element={<AuthGuard requireAuth requireOnboarding><ProductForm /></AuthGuard>} />
               <Route path="/app/store/products/:id/edit" element={<AuthGuard requireAuth requireOnboarding><ProductForm /></AuthGuard>} />
               <Route path="/app/store/orders" element={<AuthGuard requireAuth requireOnboarding><StoreOrders /></AuthGuard>} />
+              <Route path="/app/store/orders/:id" element={<AuthGuard requireAuth requireOnboarding><OrderDetail /></AuthGuard>} />
               <Route path="/app/store/quick-replies" element={<AuthGuard requireAuth requireOnboarding><QuickReplies /></AuthGuard>} />
               
               {/* Legal */}
