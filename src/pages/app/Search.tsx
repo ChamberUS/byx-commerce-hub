@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Search as SearchIcon, SlidersHorizontal, X, Bookmark, ChevronDown } from 'lucide-react';
+import { Search as SearchIcon, SlidersHorizontal, X, Bookmark, Grid, List } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 import {
   Sheet,
   SheetContent,
@@ -22,13 +23,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { ProductCard } from '@/components/marketplace/ProductCard';
+import { ZeroResults } from '@/components/common/ZeroResults';
 import { useProducts, ProductFilters } from '@/hooks/use-products';
 import { useSectors, useCategories } from '@/hooks/use-categories';
 import { useCreateSavedSearch } from '@/hooks/use-saved-searches';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const conditionOptions = [
   { value: 'new', label: 'Novo' },
@@ -51,8 +53,8 @@ export default function SearchPage() {
   
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   
-  // Filters state
   const [filters, setFilters] = useState<ProductFilters>({
     query: searchParams.get('q') || '',
     category_id: searchParams.get('category') || undefined,
@@ -102,8 +104,9 @@ export default function SearchPage() {
     }
   };
 
-  const clearFilter = (key: keyof ProductFilters) => {
-    setFilters(prev => ({ ...prev, [key]: undefined }));
+  const clearFilters = () => {
+    setFilters({ query: filters.query, sort_by: 'newest' });
+    setPriceRange([0, 10000]);
   };
 
   const activeFiltersCount = [
@@ -142,27 +145,45 @@ export default function SearchPage() {
       {/* Price Range */}
       <div>
         <Label className="text-sm font-medium mb-3 block">Faixa de Preço (BYX)</Label>
-        <div className="flex gap-2">
-          <Input
-            type="number"
-            placeholder="Mín"
-            value={filters.min_price || ''}
-            onChange={(e) => setFilters(prev => ({ 
-              ...prev, 
-              min_price: e.target.value ? Number(e.target.value) : undefined 
-            }))}
-            className="h-9"
+        <div className="px-2">
+          <Slider
+            value={priceRange}
+            onValueChange={(value) => setPriceRange(value as [number, number])}
+            onValueCommit={(value) => {
+              setFilters(prev => ({
+                ...prev,
+                min_price: value[0] > 0 ? value[0] : undefined,
+                max_price: value[1] < 10000 ? value[1] : undefined,
+              }));
+            }}
+            max={10000}
+            step={100}
+            className="mb-4"
           />
-          <Input
-            type="number"
-            placeholder="Máx"
-            value={filters.max_price || ''}
-            onChange={(e) => setFilters(prev => ({ 
-              ...prev, 
-              max_price: e.target.value ? Number(e.target.value) : undefined 
-            }))}
-            className="h-9"
-          />
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              placeholder="Mín"
+              value={priceRange[0]}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                setPriceRange([val, priceRange[1]]);
+                setFilters(prev => ({ ...prev, min_price: val > 0 ? val : undefined }));
+              }}
+              className="h-9"
+            />
+            <Input
+              type="number"
+              placeholder="Máx"
+              value={priceRange[1]}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                setPriceRange([priceRange[0], val]);
+                setFilters(prev => ({ ...prev, max_price: val < 10000 ? val : undefined }));
+              }}
+              className="h-9"
+            />
+          </div>
         </div>
       </div>
 
@@ -206,165 +227,176 @@ export default function SearchPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto">
-        {/* Search Header */}
-        <div className="sticky top-0 bg-background z-30 px-4 py-4 border-b md:relative md:border-0">
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="relative flex-1">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="O que você está buscando?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11 rounded-xl"
-              />
-            </div>
-            <Button type="submit" className="rounded-xl h-11">
-              Buscar
-            </Button>
-          </form>
-
-          {/* Active Filters & Sort */}
-          <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1">
-            {/* Filters Button */}
-            <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-xl gap-2 flex-shrink-0">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Filtros
-                  {activeFiltersCount > 0 && (
-                    <Badge variant="secondary" className="h-5 w-5 p-0 justify-center">
-                      {activeFiltersCount}
-                    </Badge>
-                  )}
+      <div className="max-w-7xl mx-auto flex">
+        {/* Desktop Sidebar Filters */}
+        {!isMobile && (
+          <aside className="w-64 flex-shrink-0 hidden lg:block border-r min-h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto p-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-semibold">Filtros</h2>
+              {activeFiltersCount > 0 && (
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  Limpar
                 </Button>
-              </SheetTrigger>
-              <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'h-[80vh]' : ''}>
-                <SheetHeader>
-                  <SheetTitle>Filtros</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 overflow-y-auto">
-                  <FilterContent />
-                </div>
-                <div className="flex gap-2 mt-6">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => setFilters({ query: filters.query, sort_by: filters.sort_by })}
-                  >
-                    Limpar
-                  </Button>
-                  <Button className="flex-1" onClick={() => setFiltersOpen(false)}>
-                    Aplicar
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Sort */}
-            <Select 
-              value={filters.sort_by || 'newest'} 
-              onValueChange={(value) => setFilters(prev => ({ ...prev, sort_by: value as ProductFilters['sort_by'] }))}
-            >
-              <SelectTrigger className="w-auto h-9 rounded-xl text-sm gap-1">
-                <SelectValue placeholder="Ordenar" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Save Search */}
-            {filters.query && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="rounded-xl gap-1 flex-shrink-0"
-                onClick={handleSaveSearch}
-                disabled={saveSearch.isPending}
-              >
-                <Bookmark className="h-4 w-4" />
-                Salvar
-              </Button>
-            )}
-
-            {/* Active Filter Chips */}
-            {filters.condition?.map((c) => (
-              <Badge key={c} variant="secondary" className="gap-1 flex-shrink-0">
-                {conditionOptions.find(o => o.value === c)?.label}
-                <X className="h-3 w-3 cursor-pointer" onClick={() => {
-                  setFilters(prev => ({
-                    ...prev,
-                    condition: prev.condition?.filter(cond => cond !== c)
-                  }));
-                }} />
-              </Badge>
-            ))}
-            
-            {filters.allow_offers && (
-              <Badge variant="secondary" className="gap-1 flex-shrink-0">
-                Aceita oferta
-                <X className="h-3 w-3 cursor-pointer" onClick={() => clearFilter('allow_offers')} />
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        {/* Sectors (horizontal scroll) */}
-        {sectors && sectors.length > 0 && (
-          <div className="px-4 py-3 border-b overflow-x-auto">
-            <div className="flex gap-2">
-              {sectors.map((sector) => (
-                <Link
-                  key={sector.id}
-                  to={`/app/search?sector=${sector.slug}`}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-accent transition-colors flex-shrink-0 text-sm"
-                >
-                  <span>{sector.emoji}</span>
-                  <span>{sector.name}</span>
-                </Link>
-              ))}
+              )}
             </div>
-          </div>
+            <FilterContent />
+          </aside>
         )}
 
-        {/* Results */}
-        <div className="px-4 py-6">
-          {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+        {/* Main Content */}
+        <div className="flex-1">
+          {/* Search Header */}
+          <div className="sticky top-0 lg:top-16 bg-background z-30 px-4 py-4 border-b">
+            <form onSubmit={handleSearch} className="flex gap-2">
+              <div className="relative flex-1">
+                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="O que você está buscando?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-11 rounded-xl"
+                />
+              </div>
+              <Button type="submit" className="rounded-xl h-11">
+                Buscar
+              </Button>
+            </form>
+
+            {/* Active Filters & Sort */}
+            <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1">
+              {/* Mobile Filters Button */}
+              {isMobile && (
+                <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-xl gap-2 flex-shrink-0">
+                      <SlidersHorizontal className="h-4 w-4" />
+                      Filtros
+                      {activeFiltersCount > 0 && (
+                        <Badge variant="secondary" className="h-5 w-5 p-0 justify-center">
+                          {activeFiltersCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="bottom" className="h-[80vh]">
+                    <SheetHeader>
+                      <SheetTitle>Filtros</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-6 overflow-y-auto">
+                      <FilterContent />
+                    </div>
+                    <div className="flex gap-2 mt-6">
+                      <Button variant="outline" className="flex-1" onClick={clearFilters}>
+                        Limpar
+                      </Button>
+                      <Button className="flex-1" onClick={() => setFiltersOpen(false)}>
+                        Aplicar
+                      </Button>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              )}
+
+              {/* Sort */}
+              <Select 
+                value={filters.sort_by || 'newest'} 
+                onValueChange={(value) => setFilters(prev => ({ ...prev, sort_by: value as ProductFilters['sort_by'] }))}
+              >
+                <SelectTrigger className="w-auto h-9 rounded-xl text-sm gap-1">
+                  <SelectValue placeholder="Ordenar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Save Search */}
+              {filters.query && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="rounded-xl gap-1 flex-shrink-0"
+                  onClick={handleSaveSearch}
+                  disabled={saveSearch.isPending}
+                >
+                  <Bookmark className="h-4 w-4" />
+                  Salvar
+                </Button>
+              )}
+
+              {/* Active Filter Chips */}
+              {filters.condition?.map((c) => (
+                <Badge key={c} variant="secondary" className="gap-1 flex-shrink-0">
+                  {conditionOptions.find(o => o.value === c)?.label}
+                  <X className="h-3 w-3 cursor-pointer" onClick={() => {
+                    setFilters(prev => ({
+                      ...prev,
+                      condition: prev.condition?.filter(cond => cond !== c)
+                    }));
+                  }} />
+                </Badge>
               ))}
+              
+              {filters.allow_offers && (
+                <Badge variant="secondary" className="gap-1 flex-shrink-0">
+                  Aceita oferta
+                  <X className="h-3 w-3 cursor-pointer" onClick={() => setFilters(prev => ({ ...prev, allow_offers: undefined }))} />
+                </Badge>
+              )}
             </div>
-          ) : products && products.length > 0 ? (
-            <>
-              <p className="text-sm text-muted-foreground mb-4">
-                {products.length} {products.length === 1 ? 'resultado' : 'resultados'}
-                {filters.query && ` para "${filters.query}"`}
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+          </div>
+
+          {/* Sectors (horizontal scroll) */}
+          {sectors && sectors.length > 0 && (
+            <div className="px-4 py-3 border-b overflow-x-auto">
+              <div className="flex gap-2">
+                {sectors.map((sector) => (
+                  <Link
+                    key={sector.id}
+                    to={`/app/search?sector=${sector.slug}`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-accent transition-colors flex-shrink-0 text-sm"
+                  >
+                    <span>{sector.emoji}</span>
+                    <span>{sector.name}</span>
+                  </Link>
                 ))}
               </div>
-            </>
-          ) : (
-            <div className="text-center py-12">
-              <SearchIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Nenhum resultado encontrado</h3>
-              <p className="text-muted-foreground mb-4">
-                Tente buscar por outros termos ou ajuste os filtros
-              </p>
-              <Button variant="outline" onClick={() => setFilters({ sort_by: 'newest' })}>
-                Limpar filtros
-              </Button>
             </div>
           )}
+
+          {/* Results */}
+          <div className="px-4 py-6">
+            {isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+                ))}
+              </div>
+            ) : products && products.length > 0 ? (
+              <>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {products.length} {products.length === 1 ? 'resultado' : 'resultados'}
+                  {filters.query && ` para "${filters.query}"`}
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {products.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <ZeroResults 
+                query={filters.query}
+                onClearFilters={clearFilters}
+                onSaveSearch={filters.query ? handleSaveSearch : undefined}
+              />
+            )}
+          </div>
         </div>
       </div>
     </AppLayout>

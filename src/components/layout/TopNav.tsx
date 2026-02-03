@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { WalletMiniWidget } from '@/components/wallet/WalletMiniWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyStore } from '@/hooks/use-store';
 import { cn } from '@/lib/utils';
@@ -23,7 +24,6 @@ const mainNavItems = [
   { path: '/app/search', icon: Search, label: 'Buscar' },
   { path: '/app/favorites', icon: Heart, label: 'Favoritos' },
   { path: '/app/orders', icon: Package, label: 'Pedidos' },
-  { path: '/app/wallet', icon: Wallet, label: 'Carteira' },
 ];
 
 export function TopNav() {
@@ -84,6 +84,9 @@ export function TopNav() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-1 sm:gap-2">
+            {/* Wallet Widget - Desktop */}
+            <WalletMiniWidget compact className="hidden lg:flex" />
+
             {/* Chat */}
             <Button variant="ghost" size="icon" className="rounded-xl" asChild>
               <Link to="/app/chat">
@@ -136,16 +139,22 @@ export function TopNav() {
                     Meus Pedidos
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/app/wallet">
+                    <Wallet className="mr-2 h-4 w-4" />
+                    Carteira
+                  </Link>
+                </DropdownMenuItem>
                 {myStore ? (
                   <DropdownMenuItem asChild>
-                    <Link to="/app/seller">
+                    <Link to="/app/store">
                       <Store className="mr-2 h-4 w-4" />
                       Minha Loja
                     </Link>
                   </DropdownMenuItem>
                 ) : profile?.tipo_usuario === 'lojista' && (
                   <DropdownMenuItem asChild>
-                    <Link to="/app/seller/create">
+                    <Link to="/app/store/create">
                       <Store className="mr-2 h-4 w-4" />
                       Criar Loja
                     </Link>
@@ -193,10 +202,10 @@ export function TopNav() {
           })}
           {myStore && (
             <Link
-              to="/app/seller"
+              to="/app/store"
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                isActive('/app/seller')
+                isActive('/app/store')
                   ? 'bg-primary/10 text-primary' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               )}
@@ -205,6 +214,16 @@ export function TopNav() {
               Minha Loja
             </Link>
           )}
+
+          {/* Crypto USP Chip */}
+          <div className="flex-1" />
+          <Link 
+            to="/app/wallet"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 text-xs text-primary hover:bg-primary/10 transition-colors border border-primary/20"
+          >
+            <Wallet className="h-3.5 w-3.5" />
+            Pague com AIOS/BYX
+          </Link>
         </nav>
 
         {/* Mobile Search */}
@@ -247,11 +266,11 @@ export function TopNav() {
           })}
           {myStore && (
             <Link
-              to="/app/seller"
+              to="/app/store"
               onClick={() => setMobileMenuOpen(false)}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
-                isActive('/app/seller')
+                isActive('/app/store')
                   ? 'bg-primary/10 text-primary' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               )}

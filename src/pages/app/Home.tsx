@@ -1,14 +1,19 @@
 import { Link } from 'react-router-dom';
-import { Bell, TrendingUp, Sparkles, Store } from 'lucide-react';
+import { Bell, TrendingUp, Sparkles, Store, BadgeCheck, ShoppingBag } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SectorGrid } from '@/components/marketplace/SectorGrid';
 import { ProductCard } from '@/components/marketplace/ProductCard';
+import { VerifiedStoresSection } from '@/components/marketplace/VerifiedStoresSection';
+import { TrustSignals } from '@/components/marketplace/TrustSignals';
+import { CryptoUSPBanner } from '@/components/marketplace/CryptoUSPBanner';
+import { WalletMiniWidget } from '@/components/wallet/WalletMiniWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/hooks/use-products';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { EmptyStateCard } from '@/components/common/EmptyStateCard';
 
 export default function Home() {
   const { profile } = useAuth();
@@ -16,7 +21,7 @@ export default function Home() {
   
   const { data: featuredProducts, isLoading: loadingFeatured } = useProducts({ 
     limit: 8, 
-    sort_by: 'newest' 
+    sort_by: 'rating' 
   });
   
   const { data: recentProducts, isLoading: loadingRecent } = useProducts({ 
@@ -33,11 +38,13 @@ export default function Home() {
         .toUpperCase()
     : 'U';
 
+  const hasProducts = (featuredProducts && featuredProducts.length > 0) || (recentProducts && recentProducts.length > 0);
+
   return (
     <AppLayout>
-      {/* Mobile Header (only on mobile) */}
+      {/* Mobile Header */}
       {isMobile && (
-        <header className="sticky top-0 bg-background/80 backdrop-blur-lg z-40 border-b">
+        <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 border-b">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
@@ -52,6 +59,7 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2">
+              <WalletMiniWidget compact />
               <Button variant="ghost" size="icon" className="rounded-xl relative" asChild>
                 <Link to="/app/notifications">
                   <Bell className="h-5 w-5" />
@@ -90,7 +98,7 @@ export default function Home() {
               </Button>
               {profile?.tipo_usuario === 'lojista' && (
                 <Button variant="outline" asChild>
-                  <Link to="/app/seller">
+                  <Link to="/app/store">
                     <Store className="mr-2 h-4 w-4" />
                     Minha Loja
                   </Link>
@@ -99,6 +107,9 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* Crypto USP Banner */}
+        <CryptoUSPBanner />
 
         {/* Categories/Sectors */}
         <section>
@@ -131,17 +142,19 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 p-8 text-center">
-              <Sparkles className="h-8 w-8 text-primary mx-auto mb-3" />
-              <p className="text-muted-foreground">
-                Novos produtos chegando em breve!
-              </p>
-              <Button className="mt-4" variant="outline" asChild>
-                <Link to="/app/search">Explorar Marketplace</Link>
-              </Button>
-            </div>
+            <EmptyStateCard
+              icon={Sparkles}
+              title="Novos produtos chegando!"
+              description="Os destaques do marketplace aparecerão aqui. Explore as categorias para encontrar o que procura."
+              actionLabel="Explorar Marketplace"
+              actionHref="/app/search"
+              variant="gradient"
+            />
           )}
         </section>
+
+        {/* Verified Stores */}
+        <VerifiedStoresSection />
 
         {/* Recent Products */}
         <section>
@@ -168,18 +181,18 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl bg-muted/50 p-8 text-center">
-              <p className="text-muted-foreground">
-                Nenhum produto disponível ainda.
-              </p>
-              {profile?.tipo_usuario === 'lojista' && (
-                <Button className="mt-4" asChild>
-                  <Link to="/app/seller/listings/new">Criar Primeiro Anúncio</Link>
-                </Button>
-              )}
-            </div>
+            <EmptyStateCard
+              icon={ShoppingBag}
+              title="Nenhum produto disponível"
+              description="Seja o primeiro a anunciar! Crie sua loja e comece a vender no BYX."
+              actionLabel={profile?.tipo_usuario === 'lojista' ? 'Criar Primeiro Anúncio' : 'Tornar-se Lojista'}
+              actionHref={profile?.tipo_usuario === 'lojista' ? '/app/store/products/new' : '/app/account/edit'}
+            />
           )}
         </section>
+
+        {/* Trust Signals */}
+        <TrustSignals />
 
         {/* CTA for Sellers */}
         {profile?.tipo_usuario !== 'lojista' && (
@@ -193,6 +206,45 @@ export default function Home() {
             </Button>
           </section>
         )}
+
+        {/* Footer Links */}
+        <footer className="border-t pt-8 pb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+            <div>
+              <h4 className="font-semibold mb-3">Marketplace</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/app/search" className="hover:text-foreground">Explorar</Link></li>
+                <li><Link to="/app/search?verified=true" className="hover:text-foreground">Lojas Verificadas</Link></li>
+                <li><Link to="/app/search?offers=true" className="hover:text-foreground">Aceita Ofertas</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Sua Conta</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/app/orders" className="hover:text-foreground">Meus Pedidos</Link></li>
+                <li><Link to="/app/favorites" className="hover:text-foreground">Favoritos</Link></li>
+                <li><Link to="/app/wallet" className="hover:text-foreground">Carteira</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Vender</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/app/store/create" className="hover:text-foreground">Criar Loja</Link></li>
+                <li><Link to="/app/store" className="hover:text-foreground">Seller Hub</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Legal</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/legal/terms" className="hover:text-foreground">Termos de Uso</Link></li>
+                <li><Link to="/legal/privacy" className="hover:text-foreground">Privacidade</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-8 pt-4 border-t text-center text-sm text-muted-foreground">
+            <p>© {new Date().getFullYear()} BYX. Todos os direitos reservados.</p>
+          </div>
+        </footer>
       </div>
     </AppLayout>
   );

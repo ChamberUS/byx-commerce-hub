@@ -1,27 +1,28 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, Package, Wallet, User, Store } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Home, Search, Package, Wallet, User, Store, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMyStore } from '@/hooks/use-store';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 
 export function BottomNav() {
   const location = useLocation();
   const { profile } = useAuth();
   const { data: myStore } = useMyStore();
 
+  const isLojista = profile?.tipo_usuario === 'lojista' || myStore;
+
   const navItems = [
     { path: '/app', icon: Home, label: 'Início' },
     { path: '/app/search', icon: Search, label: 'Buscar' },
     { path: '/app/orders', icon: Package, label: 'Pedidos' },
-    { path: '/app/wallet', icon: Wallet, label: 'Carteira' },
+    { path: '/app/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/app/account', icon: User, label: 'Conta' },
   ];
 
-  // Add seller tab for lojistas with stores
-  if (myStore) {
-    navItems.splice(4, 0, { path: '/app/seller', icon: Store, label: 'Loja' });
-    // Remove account to keep 5 items
-    navItems.pop();
+  // Replace Chat with Store for lojistas
+  if (isLojista) {
+    navItems[3] = { path: '/app/store', icon: Store, label: 'Loja' };
   }
 
   return (
