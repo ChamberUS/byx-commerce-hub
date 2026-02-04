@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Package, ShoppingCart, Users, TrendingUp, Plus, Settings,
-  ChevronRight, Wallet, ArrowUpRight, ArrowDownRight, Store
+  ChevronRight, Wallet, ArrowUpRight, ArrowDownRight, Store,
+  MessageCircle, Zap
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { useMyStore } from '@/hooks/use-store';
 import { useStoreProducts } from '@/hooks/use-products';
 import { useStoreOrders } from '@/hooks/use-orders';
 import { useAiosBalance } from '@/hooks/use-aios';
+import { DemoDataButton } from '@/components/common/DemoDataButton';
 import { cn } from '@/lib/utils';
 
 export default function SellerDashboard() {
@@ -146,11 +148,18 @@ export default function SellerDashboard() {
             </Link>
           </Button>
           <Button variant="outline" asChild className="rounded-xl">
-            <Link to="/app/store/edit">
-              <Settings className="mr-2 h-4 w-4" />
-              Editar Loja
+            <Link to="/app/chat">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Mensagens
             </Link>
           </Button>
+          <Button variant="outline" asChild className="rounded-xl">
+            <Link to="/app/store/quick-replies">
+              <Zap className="mr-2 h-4 w-4" />
+              Respostas
+            </Link>
+          </Button>
+          <DemoDataButton />
         </div>
 
         {/* Stats Grid */}
