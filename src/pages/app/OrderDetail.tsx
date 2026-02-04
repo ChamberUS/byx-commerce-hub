@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeft, Package, Store, Clock, CheckCircle2, 
-  Truck, MapPin, MessageCircle, Copy, ExternalLink 
+  Truck, MapPin, MessageCircle, Copy, ExternalLink,
+  Wallet, Loader2, Shield
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -12,11 +14,12 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useOrder } from '@/hooks/use-orders';
+import { useOrder, useUpdateOrderStatus } from '@/hooks/use-orders';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 const statusConfig = {
-  pending: { label: 'Aguardando', color: 'bg-warning/10 text-warning', icon: Clock },
+  pending: { label: 'Aguardando Pagamento', color: 'bg-warning/10 text-warning', icon: Clock },
   confirmed: { label: 'Confirmado', color: 'bg-primary/10 text-primary', icon: CheckCircle2 },
   paid: { label: 'Pago', color: 'bg-success/10 text-success', icon: CheckCircle2 },
   shipped: { label: 'Enviado', color: 'bg-primary/10 text-primary', icon: Truck },
@@ -28,8 +31,13 @@ const statusConfig = {
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { data: order, isLoading } = useOrder(id || '');
+  const updateOrderStatus = useUpdateOrderStatus();
+  
+  const [isPaying, setIsPaying] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
 
   if (isLoading) {
     return (
@@ -57,6 +65,8 @@ export default function OrderDetail() {
     );
   }
 
+  const isBuyer = order.buyer_id === user?.id;
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
       minimumFractionDigits: 2,
@@ -67,6 +77,41 @@ export default function OrderDetail() {
   const copyOrderNumber = () => {
     navigator.clipboard.writeText(order.order_number);
     toast({ title: 'Número copiado!' });
+  };
+
+  const handlePayOrder = async () => {
+    setIsPaying(true);
+    try {
+      // Simulate payment delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      await updateOrderStatus.mutateAsync({
+        orderId: order.id,
+        status: 'paid',
+      });
+      
+      toast({ title: 'Pagamento confirmado!' });
+    } catch {
+      toast({ variant: 'destructive', title: 'Erro ao processar pagamento' });
+    } finally {
+      setIsPaying(false);
+    }
+  };
+
+  const handleConfirmDelivery = async () => {
+    setIsConfirming(true);
+    try {
+      await updateOrderStatus.mutateAsync({
+        orderId: order.id,
+        status: 'delivered',
+      });
+      
+      toast({ title: 'Recebimento confirmado! Pagamento liberado ao vendedor.' });
+    } catch {
+      toast({ variant: 'destructive', title: 'Erro ao confirmar recebimento' });
+    } finally {
+      setIsConfirming(false);
+    }
   };
 
   const status = statusConfig[order.status];
@@ -89,7 +134,7 @@ export default function OrderDetail() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate('/app/orders')}
+              onClick={() => navigate(-1)}
               className="rounded-xl"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -110,6 +155,88 @@ export default function OrderDetail() {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Payment CTA for pending orders */}
+        {isBuyer && order.status === 'pending' && (
+          <Card className="rounded-2xl border-primary/20 bg-primary/5">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <Wallet className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Pagar com AIOS/BYX</h3>
+                  <p className="text-sm text-muted-foreground">Complete seu pagamento</p>
+                </div>
+              </div>
+              
+              <div className="p-3 rounded-xl bg-success/10 border border-success/20 mb-4">
+                <div className="flex items-center gap-2 text-success">
+                  <Shield className="h-4 w-4" />
+                  <span className="text-sm font-medium">Compra Protegida BYX</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Seu pagamento fica em escrow até você confirmar o recebimento
+                </p>
+              </div>
+
+              <Button 
+                className="w-full h-12 rounded-xl" 
+                size="lg"
+                onClick={handlePayOrder}
+                disabled={isPaying}
+              >
+                {isPaying ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="mr-2 h-5 w-5" />
+                    Pagar {formatPrice(order.total)} BYX
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Confirm delivery for shipped orders */}
+        {isBuyer && order.status === 'shipped' && (
+          <Card className="rounded-2xl border-success/20 bg-success/5">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-success/10 rounded-xl flex items-center justify-center">
+                  <Truck className="h-6 w-6 text-success" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Pedido enviado!</h3>
+                  <p className="text-sm text-muted-foreground">Confirme quando receber o produto</p>
+                </div>
+              </div>
+
+              <Button 
+                className="w-full h-12 rounded-xl bg-success hover:bg-success/90" 
+                size="lg"
+                onClick={handleConfirmDelivery}
+                disabled={isConfirming}
+              >
+                {isConfirming ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Confirmando...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="mr-2 h-5 w-5" />
+                    Confirmar Recebimento
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Store */}
         <Card className="rounded-2xl">
           <CardContent className="p-4">
