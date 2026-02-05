@@ -1,22 +1,25 @@
-import { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  ArrowLeft, Heart, Share2, MessageCircle, ShoppingCart, 
-  Store, Star, MapPin, ChevronLeft, ChevronRight, Tag,
-  Shield, Truck, RotateCcw
-} from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
-import { useProduct } from '@/hooks/use-products';
-import { useToggleFavoriteProduct, useIsProductFavorite } from '@/hooks/use-favorites';
-import { useCreateConversation } from '@/hooks/use-chat';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+ import { useState } from 'react';
+ import { useParams, useNavigate, Link } from 'react-router-dom';
+ import { 
+   ArrowLeft, Heart, Share2, MessageCircle, ShoppingCart, 
+   Store, Star, MapPin, ChevronLeft, ChevronRight, Tag,
+   Shield, Truck, RotateCcw, Check, Eye, BadgeCheck, 
+   ExternalLink, Zap, Package
+ } from 'lucide-react';
+ import { AppLayout } from '@/components/layout/AppLayout';
+ import { Button } from '@/components/ui/button';
+ import { Badge } from '@/components/ui/badge';
+ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+ import { Skeleton } from '@/components/ui/skeleton';
+ import { Separator } from '@/components/ui/separator';
+ import { Card, CardContent } from '@/components/ui/card';
+ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+ import { useProduct } from '@/hooks/use-products';
+ import { useToggleFavoriteProduct, useIsProductFavorite } from '@/hooks/use-favorites';
+ import { useCreateConversation } from '@/hooks/use-chat';
+ import { useAuth } from '@/contexts/AuthContext';
+ import { useToast } from '@/hooks/use-toast';
+ import { cn } from '@/lib/utils';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -121,6 +124,15 @@ export default function ProductDetail() {
     
     navigate('/app/checkout');
   };
+ 
+   const handleMakeOffer = async () => {
+     if (!user) {
+       toast({ title: 'Faça login para fazer uma oferta', variant: 'destructive' });
+       navigate('/auth/login');
+       return;
+     }
+     await handleContact();
+   };
 
   const storeInitials = product.store?.name
     .split(' ')
@@ -131,9 +143,9 @@ export default function ProductDetail() {
 
   return (
     <AppLayout>
-      <div className="max-w-6xl mx-auto">
+       <div className="max-w-7xl mx-auto">
         {/* Header - Mobile */}
-        <div className="sticky top-0 bg-background/95 backdrop-blur z-30 px-4 py-3 border-b md:hidden">
+         <div className="sticky top-0 bg-background/95 backdrop-blur z-30 px-4 py-3 border-b lg:hidden">
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
               <ArrowLeft className="h-5 w-5" />
@@ -154,10 +166,10 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        <div className="md:grid md:grid-cols-2 md:gap-8 md:p-6">
+         <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:p-6">
           {/* Image Gallery */}
-          <div className="relative">
-            <div className="aspect-square bg-muted">
+           <div className="lg:col-span-5 relative">
+             <div className="aspect-square bg-muted lg:rounded-2xl overflow-hidden">
               <img
                 src={currentImage}
                 alt={product.title}
@@ -171,7 +183,7 @@ export default function ProductDetail() {
                 <Button
                   size="icon"
                   variant="secondary"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full h-10 w-10"
+                     className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 shadow-lg"
                   onClick={() => setCurrentImageIndex(i => i > 0 ? i - 1 : images.length - 1)}
                 >
                   <ChevronLeft className="h-5 w-5" />
@@ -179,21 +191,21 @@ export default function ProductDetail() {
                 <Button
                   size="icon"
                   variant="secondary"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-10 w-10"
+                     className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 shadow-lg"
                   onClick={() => setCurrentImageIndex(i => i < images.length - 1 ? i + 1 : 0)}
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
                 
                 {/* Thumbnails */}
-                <div className="flex gap-2 p-4 overflow-x-auto">
+                   <div className="flex gap-2 p-4 overflow-x-auto lg:justify-center">
                   {images.map((img, i) => (
                     <button
                       key={img.id}
                       onClick={() => setCurrentImageIndex(i)}
                       className={cn(
-                        'w-16 h-16 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-colors',
-                        i === currentImageIndex ? 'border-primary' : 'border-transparent'
+                           'w-16 h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all',
+                           i === currentImageIndex ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-muted-foreground/30'
                       )}
                     >
                       <img src={img.url} alt="" className="w-full h-full object-cover" />
@@ -205,46 +217,71 @@ export default function ProductDetail() {
           </div>
 
           {/* Product Info */}
-          <div className="px-4 py-6 md:px-0">
+           <div className="lg:col-span-4 px-4 py-6 lg:px-0">
             {/* Badges */}
-            <div className="flex flex-wrap gap-2 mb-3">
+             <div className="flex flex-wrap gap-2 mb-4">
               <Badge variant="secondary">{conditionLabels[product.condition]}</Badge>
               {product.allow_offers && (
-                <Badge className="bg-success text-success-foreground">Aceita oferta</Badge>
-              )}
-              {product.category && (
-                <Badge variant="outline">{product.category.name}</Badge>
+                 <Badge className="bg-success/10 text-success border-success/20">
+                   <Tag className="h-3 w-3 mr-1" />
+                   Aceita oferta
+                 </Badge>
+               )}
+             </div>
+ 
+             {/* Title */}
+             <h1 className="text-2xl lg:text-3xl font-bold mb-4 leading-tight">{product.title}</h1>
+ 
+             {/* Social Proof */}
+             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+               {product.views_count > 0 && (
+                 <span className="flex items-center gap-1">
+                   <Eye className="h-4 w-4" />
+                   {product.views_count} views
+                 </span>
+               )}
+               {product.favorites_count > 0 && (
+                 <span className="flex items-center gap-1">
+                   <Heart className="h-4 w-4" />
+                   {product.favorites_count} salvos
+                 </span>
               )}
             </div>
 
-            {/* Title */}
-            <h1 className="text-2xl font-bold mb-2">{product.title}</h1>
-
             {/* Price */}
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-3xl font-bold text-primary">
-                {formatPrice(product.price)}
-              </span>
-              <span className="text-lg text-muted-foreground">BYX</span>
+             <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 mb-6">
+               <div className="flex items-baseline gap-2">
+                 <span className="text-3xl lg:text-4xl font-bold text-primary">
+                   {formatPrice(product.price)}
+                 </span>
+                 <span className="text-lg text-primary/70">BYX</span>
+               </div>
               {product.price_brl_ref && (
-                <span className="text-sm text-muted-foreground">
+                 <p className="text-sm text-muted-foreground mt-1">
                   (~R$ {formatPrice(product.price_brl_ref)})
-                </span>
+                 </p>
               )}
             </div>
 
             {/* Stock */}
-            <p className="text-sm text-muted-foreground mb-6">
-              {product.stock_quantity > 1 
-                ? `${product.stock_quantity} unidades disponíveis` 
-                : product.stock_quantity === 1 
-                  ? 'Última unidade!' 
-                  : 'Esgotado'}
-            </p>
+             <div className="flex items-center gap-2 mb-6">
+               {product.stock_quantity > 0 ? (
+                 <>
+                   <Check className="h-4 w-4 text-success" />
+                   <span className="text-sm">
+                     {product.stock_quantity > 1 
+                       ? `${product.stock_quantity} disponíveis` 
+                       : <span className="text-warning font-medium">Última unidade!</span>}
+                   </span>
+                 </>
+               ) : (
+                 <Badge variant="destructive">Esgotado</Badge>
+               )}
+             </div>
 
             {/* Actions */}
             <div className="flex gap-3 mb-6">
-              <Button className="flex-1 h-12 rounded-xl" size="lg" onClick={handleBuyNow}>
+               <Button className="flex-1 h-12 rounded-xl font-semibold" size="lg" onClick={handleBuyNow}>
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 Comprar Agora
               </Button>
@@ -270,30 +307,48 @@ export default function ProductDetail() {
             {/* Make Offer */}
             {product.allow_offers && (
               <Button 
-                variant="secondary" 
-                className="w-full h-11 rounded-xl mb-6"
-                onClick={handleContact}
+                 variant="outline" 
+                 className="w-full h-11 rounded-xl mb-6 border-dashed"
+                 onClick={handleMakeOffer}
               >
                 <Tag className="mr-2 h-4 w-4" />
-                Fazer uma oferta
+                 Negociar preço
               </Button>
             )}
+ 
+             {/* Trust Signals */}
+             <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-muted/50 mb-6">
+               <div className="flex flex-col items-center text-center p-2">
+                 <Shield className="h-5 w-5 text-primary mb-1" />
+                 <span className="text-xs text-muted-foreground">Compra Protegida</span>
+               </div>
+               <div className="flex flex-col items-center text-center p-2">
+                 <Truck className="h-5 w-5 text-primary mb-1" />
+                 <span className="text-xs text-muted-foreground">Entrega</span>
+               </div>
+               <div className="flex flex-col items-center text-center p-2">
+                 <RotateCcw className="h-5 w-5 text-primary mb-1" />
+                 <span className="text-xs text-muted-foreground">Devolução</span>
+               </div>
+             </div>
 
             <Separator className="my-6" />
 
             {/* Store Info */}
             <Link 
               to={`/app/store/${product.store?.slug}`}
-              className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+               className="flex items-center gap-4 p-4 rounded-xl border hover:border-primary/50 transition-all group"
             >
-              <Avatar className="h-14 w-14 border-2 border-background">
+               <Avatar className="h-14 w-14 border-2 border-background shadow-md">
                 <AvatarImage src={product.store?.logo_url || undefined} />
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                   {storeInitials}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h3 className="font-semibold">{product.store?.name}</h3>
+                 <div className="flex items-center gap-2">
+                   <h3 className="font-semibold group-hover:text-primary transition-colors">{product.store?.name}</h3>
+                 </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   {product.store?.rating_avg && product.store.rating_avg > 0 && (
                     <span className="flex items-center gap-1">
@@ -309,51 +364,153 @@ export default function ProductDetail() {
                   )}
                 </div>
               </div>
-              <Store className="h-5 w-5 text-muted-foreground" />
+               <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
             </Link>
+ 
+             {product.category && (
+               <div className="mt-4">
+                 <Badge variant="outline" className="text-xs">{product.category.name}</Badge>
+               </div>
+             )}
+           </div>
+ 
+           {/* Right Sidebar - Desktop */}
+           <div className="hidden lg:block lg:col-span-3">
+             <div className="sticky top-24 space-y-4">
+               <Card>
+                 <CardContent className="pt-6 space-y-3">
+                   <Button className="w-full h-12 rounded-xl font-semibold" size="lg" onClick={handleBuyNow}>
+                     <Zap className="mr-2 h-5 w-5" />
+                     Comprar Agora
+                   </Button>
+                   <Button variant="outline" className="w-full h-10 rounded-xl" onClick={handleContact}>
+                     <MessageCircle className="mr-2 h-4 w-4" />
+                     Perguntar
+                   </Button>
+                   {product.allow_offers && (
+                     <Button variant="secondary" className="w-full h-10 rounded-xl" onClick={handleMakeOffer}>
+                       <Tag className="mr-2 h-4 w-4" />
+                       Fazer Oferta
+                     </Button>
+                   )}
+                   <div className="flex gap-2 pt-2">
+                     <Button 
+                       variant="ghost" 
+                       className={cn('flex-1 rounded-xl', isFavorite && 'text-destructive')}
+                       onClick={() => user && toggleFavorite.mutate(product.id)}
+                     >
+                       <Heart className={cn('h-4 w-4 mr-2', isFavorite && 'fill-current')} />
+                       {isFavorite ? 'Salvo' : 'Salvar'}
+                     </Button>
+                     <Button variant="ghost" className="flex-1 rounded-xl" onClick={handleShare}>
+                       <Share2 className="h-4 w-4 mr-2" />
+                       Compartilhar
+                     </Button>
+                   </div>
+                 </CardContent>
+               </Card>
+ 
+               <Card className="bg-primary/5 border-primary/20">
+                 <CardContent className="pt-6">
+                   <div className="flex items-start gap-3 mb-4">
+                     <div className="p-2 rounded-lg bg-primary/10">
+                       <Shield className="h-5 w-5 text-primary" />
+                     </div>
+                     <div>
+                       <h4 className="font-semibold text-sm">Compra Protegida</h4>
+                       <p className="text-xs text-muted-foreground mt-1">
+                         Pagamento em escrow até confirmar recebimento.
+                       </p>
+                     </div>
+                   </div>
+                   <div className="space-y-2 text-xs text-muted-foreground">
+                     <div className="flex items-center gap-2">
+                       <Check className="h-3 w-3 text-success" />
+                       <span>Devolução garantida</span>
+                     </div>
+                     <div className="flex items-center gap-2">
+                       <Check className="h-3 w-3 text-success" />
+                       <span>Suporte a disputas</span>
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             </div>
+           </div>
+         </div>
+ 
+         {/* Tabs Section */}
+         <div className="px-4 lg:px-6 pb-8">
+           <Tabs defaultValue="description" className="w-full">
+             <TabsList className="w-full justify-start overflow-x-auto h-12 bg-muted/50 rounded-xl p-1">
+               <TabsTrigger value="description" className="rounded-lg">Descrição</TabsTrigger>
+               <TabsTrigger value="specs" className="rounded-lg">Especificações</TabsTrigger>
+               <TabsTrigger value="shipping" className="rounded-lg">Envio</TabsTrigger>
+             </TabsList>
 
-            <Separator className="my-6" />
-
-            {/* Description */}
-            <div className="mb-6">
-              <h3 className="font-semibold mb-3">Descrição</h3>
-              <p className="text-muted-foreground whitespace-pre-wrap">
-                {product.description || 'Sem descrição disponível.'}
-              </p>
-            </div>
-
-            {/* Attributes */}
-            {product.attributes && Object.keys(product.attributes).length > 0 && (
-              <div className="mb-6">
-                <h3 className="font-semibold mb-3">Características</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(product.attributes).map(([key, value]) => (
-                    <div key={key} className="p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs text-muted-foreground capitalize">{key}</p>
-                      <p className="font-medium">{value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Trust Signals */}
-            <div className="grid grid-cols-3 gap-3 py-4">
-              <div className="flex flex-col items-center text-center p-3 rounded-lg bg-muted/50">
-                <Shield className="h-5 w-5 text-primary mb-1" />
-                <span className="text-xs text-muted-foreground">Compra Segura</span>
-              </div>
-              <div className="flex flex-col items-center text-center p-3 rounded-lg bg-muted/50">
-                <Truck className="h-5 w-5 text-primary mb-1" />
-                <span className="text-xs text-muted-foreground">Entrega</span>
-              </div>
-              <div className="flex flex-col items-center text-center p-3 rounded-lg bg-muted/50">
-                <RotateCcw className="h-5 w-5 text-primary mb-1" />
-                <span className="text-xs text-muted-foreground">Devolução</span>
-              </div>
-            </div>
-          </div>
-        </div>
+             <TabsContent value="description" className="mt-6">
+               <Card>
+                 <CardContent className="pt-6">
+                   {product.description ? (
+                     <p className="text-muted-foreground whitespace-pre-wrap">{product.description}</p>
+                   ) : (
+                     <p className="text-center py-8 text-muted-foreground">Sem descrição.</p>
+                   )}
+                 </CardContent>
+               </Card>
+             </TabsContent>
+ 
+             <TabsContent value="specs" className="mt-6">
+               <Card>
+                 <CardContent className="pt-6">
+                   <div className="grid sm:grid-cols-2 gap-4">
+                     {product.attributes && Object.entries(product.attributes).map(([key, value]) => (
+                       <div key={key} className="flex justify-between p-3 rounded-lg bg-muted/50">
+                         <span className="text-muted-foreground capitalize">{key}</span>
+                         <span className="font-medium">{value}</span>
+                       </div>
+                     ))}
+                     <div className="flex justify-between p-3 rounded-lg bg-muted/50">
+                       <span className="text-muted-foreground">Condição</span>
+                       <span className="font-medium">{conditionLabels[product.condition]}</span>
+                     </div>
+                     <div className="flex justify-between p-3 rounded-lg bg-muted/50">
+                       <span className="text-muted-foreground">Estoque</span>
+                       <span className="font-medium">{product.stock_quantity}</span>
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             </TabsContent>
+ 
+             <TabsContent value="shipping" className="mt-6">
+               <Card>
+                 <CardContent className="pt-6">
+                   <div className="space-y-4">
+                     <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/50">
+                       <Truck className="h-5 w-5 text-primary mt-0.5" />
+                       <div>
+                         <h4 className="font-medium">Envio</h4>
+                         <p className="text-sm text-muted-foreground">
+                           Prazo e custo a combinar com o vendedor.
+                         </p>
+                       </div>
+                     </div>
+                     <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/50">
+                       <RotateCcw className="h-5 w-5 text-primary mt-0.5" />
+                       <div>
+                         <h4 className="font-medium">Devolução</h4>
+                         <p className="text-sm text-muted-foreground">
+                           Devolução em até 7 dias para defeitos.
+                         </p>
+                       </div>
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             </TabsContent>
+           </Tabs>
+         </div>
       </div>
     </AppLayout>
   );

@@ -50,6 +50,9 @@ import QuickReplies from "./pages/seller/QuickReplies";
 // Legal pages
 import LegalTerms from "./pages/legal/Terms";
 import LegalPrivacy from "./pages/legal/Privacy";
+ 
+ // Other pages
+ import FAQ from "./pages/app/FAQ";
 
 import NotFound from "./pages/NotFound";
 
@@ -106,6 +109,7 @@ const App = () => (
               <Route path="/app/store/orders" element={<AuthGuard requireAuth requireOnboarding><StoreOrders /></AuthGuard>} />
               <Route path="/app/store/orders/:id" element={<AuthGuard requireAuth requireOnboarding><OrderDetail /></AuthGuard>} />
               <Route path="/app/store/quick-replies" element={<AuthGuard requireAuth requireOnboarding><QuickReplies /></AuthGuard>} />
+               <Route path="/app/faq" element={<AuthGuard requireAuth requireOnboarding><FAQ /></AuthGuard>} />
               
               {/* Legal */}
               <Route path="/legal/terms" element={<LegalTerms />} />
