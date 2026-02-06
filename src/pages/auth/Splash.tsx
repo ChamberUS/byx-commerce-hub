@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 
+const INTRO_SEEN_KEY = 'byx_intro_seen';
+
 export default function Splash() {
   const navigate = useNavigate();
   const { user, profile, loading } = useAuth();
@@ -11,14 +13,19 @@ export default function Splash() {
     if (loading) return;
 
     const timer = setTimeout(() => {
+      const introSeen = localStorage.getItem(INTRO_SEEN_KEY) === 'true';
+      const introSeenByUser = profile?.onboarding_seen_at != null;
+      
       if (user && profile?.onboarding_completo) {
         navigate('/app', { replace: true });
       } else if (user && !profile?.onboarding_completo) {
         navigate('/auth/complete-profile', { replace: true });
+      } else if (introSeen || introSeenByUser) {
+        navigate('/auth/login', { replace: true });
       } else {
         navigate('/auth/intro', { replace: true });
       }
-    }, 2000);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [user, profile, loading, navigate]);
@@ -38,8 +45,8 @@ export default function Splash() {
 
         {/* Brand */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">BYX</h1>
-          <p className="text-muted-foreground mt-1">A moeda do novo comércio</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Buynnex</h1>
+          <p className="text-muted-foreground mt-1">Marketplace global</p>
         </div>
       </motion.div>
 

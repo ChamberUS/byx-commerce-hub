@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  Search, Bell, MessageCircle, Heart, Package, Wallet, 
+  Search, MessageCircle, Heart, Package, 
   Home, User, Store, Menu, X, ChevronDown 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { WalletMiniWidget } from '@/components/wallet/WalletMiniWidget';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyStore } from '@/hooks/use-store';
 import { cn } from '@/lib/utils';
@@ -65,7 +65,7 @@ export function TopNav() {
             <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
               <span className="text-sm font-bold text-primary-foreground">B</span>
             </div>
-            <span className="font-bold text-xl hidden sm:block">BYX</span>
+            <span className="font-bold text-xl hidden sm:block">Buynnex</span>
           </Link>
 
           {/* Search Bar - Desktop */}
@@ -84,9 +84,6 @@ export function TopNav() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-1 sm:gap-2">
-            {/* Wallet Widget - Desktop */}
-            <WalletMiniWidget compact className="hidden lg:flex" />
-
             {/* Chat */}
             <Button variant="ghost" size="icon" className="rounded-xl" asChild>
               <Link to="/app/chat">
@@ -95,12 +92,7 @@ export function TopNav() {
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="rounded-xl relative" asChild>
-              <Link to="/app/notifications">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-              </Link>
-            </Button>
+            <NotificationCenter />
 
             {/* User Menu */}
             <DropdownMenu>
@@ -137,12 +129,6 @@ export function TopNav() {
                   <Link to="/app/orders">
                     <Package className="mr-2 h-4 w-4" />
                     Meus Pedidos
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/app/wallet">
-                    <Wallet className="mr-2 h-4 w-4" />
-                    Carteira
                   </Link>
                 </DropdownMenuItem>
                 {myStore ? (
@@ -214,16 +200,6 @@ export function TopNav() {
               Minha Loja
             </Link>
           )}
-
-          {/* Crypto USP Chip */}
-          <div className="flex-1" />
-          <Link 
-            to="/app/wallet"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 text-xs text-primary hover:bg-primary/10 transition-colors border border-primary/20"
-          >
-            <Wallet className="h-3.5 w-3.5" />
-            Pague com AIOS/BYX
-          </Link>
         </nav>
 
         {/* Mobile Search */}

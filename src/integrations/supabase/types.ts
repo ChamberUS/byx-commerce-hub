@@ -422,6 +422,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          href: string | null
+          id: string
+          metadata: Json | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          href?: string | null
+          id?: string
+          metadata?: Json | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          href?: string | null
+          id?: string
+          metadata?: Json | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       offers: {
         Row: {
           amount: number
@@ -771,6 +807,7 @@ export type Database = {
           modo_iniciante: boolean | null
           nome: string | null
           onboarding_completo: boolean | null
+          onboarding_seen_at: string | null
           telefone: string | null
           termos_aceitos_em: string | null
           tipo_usuario: Database["public"]["Enums"]["user_type"] | null
@@ -784,6 +821,7 @@ export type Database = {
           modo_iniciante?: boolean | null
           nome?: string | null
           onboarding_completo?: boolean | null
+          onboarding_seen_at?: string | null
           telefone?: string | null
           termos_aceitos_em?: string | null
           tipo_usuario?: Database["public"]["Enums"]["user_type"] | null
@@ -797,6 +835,7 @@ export type Database = {
           modo_iniciante?: boolean | null
           nome?: string | null
           onboarding_completo?: boolean | null
+          onboarding_seen_at?: string | null
           telefone?: string | null
           termos_aceitos_em?: string | null
           tipo_usuario?: Database["public"]["Enums"]["user_type"] | null

@@ -215,7 +215,7 @@ export default function Checkout() {
           </p>
           <div className="bg-muted/50 rounded-xl p-4 mb-6">
             <p className="text-sm text-muted-foreground">Total pago</p>
-            <p className="text-2xl font-bold text-primary">{formatPrice(total)} BYX</p>
+            <p className="text-2xl font-bold text-primary">R$ {formatPrice(total * 5.5)}</p>
           </div>
           <div className="flex flex-col gap-3">
             <Button onClick={() => navigate(`/app/orders/${orderId}`)} className="rounded-xl">
@@ -236,29 +236,18 @@ export default function Checkout() {
       <AppLayout>
         <header className="sticky top-0 bg-background/80 backdrop-blur-lg z-40 border-b">
           <div className="flex items-center gap-3 px-4 py-3">
-            <h1 className="text-lg font-semibold">Pagamento</h1>
+            <h1 className="text-lg font-semibold">Escolha o Pagamento</h1>
           </div>
         </header>
 
-        <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+        <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
+          {/* Order Summary */}
           <Card className="rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <Wallet className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Pagar com AIOS/BYX</h3>
-                  <p className="text-sm text-muted-foreground">Pagamento instantâneo e sem taxas</p>
-                </div>
-              </div>
-              
-              <Separator className="my-4" />
-              
-              <div className="space-y-2 mb-6">
+            <CardContent className="p-4">
+              <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>{formatPrice(subtotal)} BYX</span>
+                  <span>R$ {formatPrice(subtotal * 5.5)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Frete</span>
@@ -267,40 +256,116 @@ export default function Checkout() {
                 <Separator />
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total</span>
-                  <span className="text-primary">{formatPrice(total)} BYX</span>
+                  <span>R$ {formatPrice(total * 5.5)}</span>
                 </div>
               </div>
-
-              <div className="p-3 rounded-xl bg-success/10 border border-success/20 mb-6">
-                <div className="flex items-center gap-2 text-success">
-                  <Shield className="h-4 w-4" />
-                  <span className="text-sm font-medium">Compra Protegida BYX</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Seu pagamento fica em escrow até você confirmar o recebimento
-                </p>
-              </div>
-
-              <Button 
-                className="w-full h-12 rounded-xl" 
-                size="lg"
-                onClick={handlePayWithAIOS}
-                disabled={isPaying}
-              >
-                {isPaying ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Wallet className="mr-2 h-5 w-5" />
-                    Pagar {formatPrice(total)} BYX
-                  </>
-                )}
-              </Button>
             </CardContent>
           </Card>
+
+          {/* Payment Methods */}
+          <div className="space-y-3">
+            <h3 className="font-medium text-sm text-muted-foreground">Métodos de pagamento</h3>
+            
+            {/* PIX */}
+            <Card className="rounded-2xl cursor-pointer hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">
+                    <svg className="h-5 w-5 text-green-500" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M11.983 0c.276 0 .542.027.8.077a3.52 3.52 0 0 1 2.07 1.104l1.43 1.44a3.52 3.52 0 0 1 1.104 2.07c.05.258.077.524.077.8v.017c0 .276-.027.542-.077.8a3.52 3.52 0 0 1-1.104 2.07l-1.43 1.44a3.52 3.52 0 0 1-2.07 1.104 3.42 3.42 0 0 1-.8.077h-.017a3.42 3.42 0 0 1-.8-.077 3.52 3.52 0 0 1-2.07-1.104l-1.43-1.44a3.52 3.52 0 0 1-1.104-2.07 3.42 3.42 0 0 1-.077-.8V5.49c0-.276.027-.542.077-.8a3.52 3.52 0 0 1 1.104-2.07l1.43-1.44A3.52 3.52 0 0 1 11.166.077c.258-.05.524-.077.8-.077h.017zm6.017 8.017a3.42 3.42 0 0 1 .8.077 3.52 3.52 0 0 1 2.07 1.104l1.44 1.43a3.52 3.52 0 0 1 1.104 2.07c.05.258.077.524.077.8v.017c0 .276-.027.542-.077.8a3.52 3.52 0 0 1-1.104 2.07l-1.44 1.43a3.52 3.52 0 0 1-2.07 1.104 3.42 3.42 0 0 1-.8.077h-.017a3.42 3.42 0 0 1-.8-.077 3.52 3.52 0 0 1-2.07-1.104l-1.43-1.44a3.52 3.52 0 0 1-1.104-2.07 3.42 3.42 0 0 1-.077-.8v-.017c0-.276.027-.542.077-.8a3.52 3.52 0 0 1 1.104-2.07l1.43-1.43a3.52 3.52 0 0 1 2.07-1.104 3.42 3.42 0 0 1 .8-.077h.017z"/>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">PIX</p>
+                    <p className="text-sm text-muted-foreground">Aprovação instantânea</p>
+                  </div>
+                  <Badge variant="secondary">Popular</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cartão */}
+            <Card className="rounded-2xl cursor-pointer hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                    <CreditCard className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">Cartão de Crédito</p>
+                    <p className="text-sm text-muted-foreground">Até 12x sem juros</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Boleto */}
+            <Card className="rounded-2xl cursor-pointer hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-500/10 rounded-xl flex items-center justify-center">
+                    <svg className="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M2 4h2v16H2V4zm4 0h1v16H6V4zm3 0h2v16H9V4zm4 0h1v16h-1V4zm3 0h2v16h-2V4zm4 0h2v16h-2V4z"/>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">Boleto Bancário</p>
+                    <p className="text-sm text-muted-foreground">Vencimento em 3 dias</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* AIOS/Crypto */}
+            <Card className="rounded-2xl cursor-pointer hover:border-primary/50 transition-colors border-primary/30 bg-primary/5">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Wallet className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">AIOS / Cripto</p>
+                    <p className="text-sm text-muted-foreground">{formatPrice(total)} AIOS • Sem taxas</p>
+                  </div>
+                  <Badge className="bg-primary/10 text-primary border-0">Opcional</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Protection Notice */}
+          <div className="p-3 rounded-xl bg-success/10 border border-success/20">
+            <div className="flex items-center gap-2 text-success">
+              <Shield className="h-4 w-4" />
+              <span className="text-sm font-medium">Compra Protegida</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Seu pagamento fica em escrow até você confirmar o recebimento
+            </p>
+          </div>
+
+          {/* Demo Pay Button */}
+          <Button 
+            className="w-full h-12 rounded-xl" 
+            size="lg"
+            onClick={handlePayWithAIOS}
+            disabled={isPaying}
+          >
+            {isPaying ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              <>
+                Pagar R$ {formatPrice(total * 5.5)}
+              </>
+            )}
+          </Button>
+          
+          <p className="text-xs text-center text-muted-foreground">
+            Simulação de pagamento para demonstração
+          </p>
         </div>
       </AppLayout>
     );

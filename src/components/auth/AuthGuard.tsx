@@ -10,6 +10,9 @@ interface AuthGuardProps {
   requireOnboarding?: boolean;
 }
 
+const INTRO_SEEN_KEY = 'byx_intro_seen';
+const PUBLIC_AUTH_ROUTES = ['/auth/intro', '/auth/profile-choice', '/auth/login', '/auth/verify'];
+
 export function AuthGuard({
   children,
   requireAuth = false,
@@ -18,52 +21,98 @@ export function AuthGuard({
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isReady, setIsReady] = useState(false);
   
   const { data: termsDoc, isLoading: loadingTerms } = useActiveLegalDocument('terms');
   const { data: acceptances, isLoading: loadingAcceptances } = useUserAcceptances();
 
   useEffect(() => {
-    if (loading || loadingTerms || loadingAcceptances) return;
-
-    const isAuthRoute = location.pathname.startsWith('/auth');
-    const isPublicAuthRoute = ['/auth/intro', '/auth/profile-choice', '/auth/login', '/auth/verify'].includes(location.pathname);
-    const isTermsRoute = location.pathname === '/auth/terms';
-
-    if (requireAuth && !user) {
-      // Not logged in, redirect to intro
-      navigate('/auth/intro', { replace: true });
+    // Wait for all loading states to complete
+    if (loading || (requireOnboarding && (loadingTerms || loadingAcceptances))) {
       return;
     }
 
-    // Check if user needs to accept new terms version
+    const isPublicAuthRoute = PUBLIC_AUTH_ROUTES.includes(location.pathname);
+    const isTermsRoute = location.pathname === '/auth/terms';
+    const isIntroRoute = location.pathname === '/auth/intro';
+
+    // Check if intro was already seen (device-level)
+    const introSeenLocally = localStorage.getItem(INTRO_SEEN_KEY) === 'true';
+    // Check if user has seen intro (user-level)
+    const introSeenByUser = profile?.onboarding_seen_at != null;
+
+    // 1. If route requires auth but user is not logged in
+    if (requireAuth && !user) {
+      // Check if intro should be shown first
+      if (!introSeenLocally) {
+        navigate('/auth/intro', { replace: true });
+      } else {
+        navigate('/auth/login', { replace: true });
+      }
+      return;
+    }
+
+    // 2. If user is on intro but already saw it
+    if (isIntroRoute && (introSeenLocally || introSeenByUser)) {
+      if (user && profile?.onboarding_completo) {
+        navigate('/app', { replace: true });
+      } else if (user) {
+        navigate('/auth/complete-profile', { replace: true });
+      } else {
+        navigate('/auth/login', { replace: true });
+      }
+      return;
+    }
+
+    // 3. Check if user needs to accept new terms version
     if (requireOnboarding && user && termsDoc) {
       const hasAcceptedCurrentTerms = acceptances?.some(a => a.document_id === termsDoc.id);
       
       if (!hasAcceptedCurrentTerms && !isTermsRoute) {
-        // User hasn't accepted current terms version
         navigate('/auth/terms', { replace: true });
         return;
       }
     }
 
+    // 4. Check if onboarding is complete
     if (requireOnboarding && user && !profile?.onboarding_completo) {
-      // Logged in but onboarding not complete
       if (location.pathname !== '/auth/complete-profile' && 
           location.pathname !== '/auth/terms' &&
           location.pathname !== '/auth/success') {
         navigate('/auth/complete-profile', { replace: true });
+        return;
       }
-      return;
     }
 
+    // 5. If user is fully logged in and on public auth routes, redirect to app
     if (user && profile?.onboarding_completo && isPublicAuthRoute) {
-      // Already logged in and onboarding complete, redirect to app
       navigate('/app', { replace: true });
       return;
     }
-  }, [user, profile, loading, navigate, location, requireAuth, requireOnboarding, termsDoc, acceptances, loadingTerms, loadingAcceptances]);
 
+    // All checks passed, ready to render
+    setIsReady(true);
+  }, [
+    user, 
+    profile, 
+    loading, 
+    navigate, 
+    location.pathname, 
+    requireAuth, 
+    requireOnboarding, 
+    termsDoc, 
+    acceptances, 
+    loadingTerms, 
+    loadingAcceptances
+  ]);
+
+  // Show loading while auth is being verified
   if (loading || (requireOnboarding && (loadingTerms || loadingAcceptances))) {
+    return <LoadingState fullScreen message="Carregando..." />;
+  }
+
+  // Don't render content until all guards have been checked
+  if (!isReady) {
     return <LoadingState fullScreen message="Carregando..." />;
   }
 
