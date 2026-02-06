@@ -30,10 +30,19 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMessages, useSendMessage, useCreateOffer, useRespondToOffer, Message, Offer } from '@/hooks/use-chat';
-import { useQuickReplies } from '@/hooks/use-quick-replies';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+
+// Preset quick replies for sellers
+const PRESET_QUICK_REPLIES = [
+  { id: '1', title: 'Disponível', content: 'Sim, está disponível!' },
+  { id: '2', title: 'Já vendi', content: 'Infelizmente já foi vendido.' },
+  { id: '3', title: 'Aceito oferta', content: 'Aceito sua oferta! Podemos prosseguir.' },
+  { id: '4', title: 'Qual CEP?', content: 'Qual o seu CEP para calcular o frete?' },
+  { id: '5', title: 'Envio hoje', content: 'Consigo enviar ainda hoje!' },
+  { id: '6', title: 'Obrigado', content: 'Obrigado pelo interesse!' },
+];
 
 interface ConversationDetails {
   id: string;
@@ -68,7 +77,7 @@ export default function ChatRoom() {
   const respondToOffer = useRespondToOffer();
   
   const isStoreOwner = conversation?.store?.owner_id === user?.id;
-  const { data: quickReplies } = useQuickReplies(isStoreOwner ? conversation?.store_id || '' : '');
+  const quickReplies = PRESET_QUICK_REPLIES;
 
   useEffect(() => {
     if (!conversationId) return;
@@ -295,8 +304,8 @@ export default function ChatRoom() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick Replies */}
-        {showQuickReplies && quickReplies && quickReplies.length > 0 && (
+        {/* Quick Replies - Always show for store owner */}
+        {showQuickReplies && isStoreOwner && (
           <div className="border-t bg-background p-2 flex gap-2 overflow-x-auto">
             {quickReplies.map((qr) => (
               <Button
@@ -315,7 +324,7 @@ export default function ChatRoom() {
         {/* Input */}
         <div className="sticky bottom-0 bg-background border-t p-3 pb-safe">
           <div className="flex items-center gap-2">
-            {isStoreOwner && quickReplies && quickReplies.length > 0 && (
+            {isStoreOwner && (
               <Button
                 variant="ghost"
                 size="icon"

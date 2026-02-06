@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Globe, Shield, Wallet } from 'lucide-react';
+import { ChevronRight, Globe, Shield, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -14,21 +14,21 @@ const slides = [
     icon: Globe,
     title: 'Compre e venda sem fronteiras',
     description:
-      'O BYX conecta você a um mercado global. Encontre produtos únicos ou venda para o mundo todo.',
+      'Marketplace global com milhares de produtos. Encontre o que precisa ou venda para o mundo todo.',
     color: 'bg-primary',
   },
   {
-    icon: Shield,
-    title: 'Pagamentos simples e seguros',
+    icon: CreditCard,
+    title: 'Pagamentos do seu jeito',
     description:
-      'Transações protegidas por tecnologia de ponta. Você compra com confiança, o vendedor recebe com segurança.',
+      'PIX, cartão, boleto e cripto. Você escolhe como pagar — sem complicação, sem taxas escondidas.',
     color: 'bg-success',
   },
   {
-    icon: Wallet,
-    title: 'Você no controle do seu dinheiro',
+    icon: Shield,
+    title: 'Segurança e confiança',
     description:
-      'Sua carteira BYX é sua. Sem bancos, sem taxas escondidas, sem surpresas. Simples assim.',
+      'Proteção em cada transação. Escrow, suporte 24h e vendedores verificados. Compre com tranquilidade.',
     color: 'bg-primary',
   },
 ];

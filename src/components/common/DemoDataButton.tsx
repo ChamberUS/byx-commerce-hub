@@ -120,13 +120,30 @@ export function DemoDataButton() {
         { title: 'Envio', content: 'Enviamos para todo o Brasil. O frete é calculado pelo CEP.' },
       ];
 
-      for (const qr of quickReplies) {
-        await supabase.from('quick_replies').insert({
-          store_id: storeId,
-          title: qr.title,
-          content: qr.content,
-        });
-      }
+      // Create demo notifications
+      await supabase.from('notifications').insert([
+        {
+          user_id: user.id,
+          type: 'order',
+          title: 'Novo pedido recebido!',
+          body: 'Você recebeu um novo pedido de iPhone 14 Pro Max.',
+          href: '/app/store/orders',
+        },
+        {
+          user_id: user.id,
+          type: 'message',
+          title: 'Nova mensagem',
+          body: 'Um comprador enviou uma pergunta sobre o MacBook.',
+          href: '/app/chat',
+        },
+        {
+          user_id: user.id,
+          type: 'offer',
+          title: 'Nova oferta recebida',
+          body: 'R$ 3.500 pelo PlayStation 5.',
+          href: '/app/chat',
+        },
+      ]);
 
       toast({ title: 'Dados demo criados com sucesso!' });
       window.location.reload();
