@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WalletProvider } from "@/contexts/WalletContext";
 import { AuthGuard } from "@/components/auth/AuthGuard";
@@ -44,6 +45,7 @@ import CreateStore from "./pages/seller/CreateStore";
 import EditStore from "./pages/seller/EditStore";
 import SellerProducts from "./pages/seller/Products";
 import ProductForm from "./pages/seller/ProductForm";
+import CreateListingWizard from "./pages/seller/CreateListingWizard";
 import StoreOrders from "./pages/seller/StoreOrders";
 import QuickReplies from "./pages/seller/QuickReplies";
 
@@ -60,6 +62,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -104,7 +107,7 @@ const App = () => (
               <Route path="/app/store/create" element={<AuthGuard requireAuth requireOnboarding><CreateStore /></AuthGuard>} />
               <Route path="/app/store/edit" element={<AuthGuard requireAuth requireOnboarding><EditStore /></AuthGuard>} />
               <Route path="/app/store/products" element={<AuthGuard requireAuth requireOnboarding><SellerProducts /></AuthGuard>} />
-              <Route path="/app/store/products/new" element={<AuthGuard requireAuth requireOnboarding><ProductForm /></AuthGuard>} />
+              <Route path="/app/store/products/new" element={<AuthGuard requireAuth requireOnboarding><CreateListingWizard /></AuthGuard>} />
               <Route path="/app/store/products/:id/edit" element={<AuthGuard requireAuth requireOnboarding><ProductForm /></AuthGuard>} />
               <Route path="/app/store/orders" element={<AuthGuard requireAuth requireOnboarding><StoreOrders /></AuthGuard>} />
               <Route path="/app/store/orders/:id" element={<AuthGuard requireAuth requireOnboarding><OrderDetail /></AuthGuard>} />
@@ -121,6 +124,7 @@ const App = () => (
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

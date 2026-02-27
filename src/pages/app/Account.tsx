@@ -18,6 +18,7 @@ import {
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProfileCard } from '@/components/account/ProfileCard';
 import { BeginnerModeToggle } from '@/components/account/BeginnerModeToggle';
+import { ThemeToggle } from '@/components/account/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -199,6 +200,9 @@ export default function Account() {
           onCheckedChange={handleModeChange}
           disabled={updatingMode}
         />
+
+        {/* Theme / Dark Mode */}
+        <ThemeToggle />
 
         {/* Account Data */}
         <SettingsSection title="Dados da conta">
