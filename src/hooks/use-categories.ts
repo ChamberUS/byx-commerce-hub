@@ -6,6 +6,7 @@ export interface Sector {
   name: string;
   slug: string;
   emoji: string | null;
+  image_url: string | null;
   description: string | null;
   sort_order: number;
   is_active: boolean;
