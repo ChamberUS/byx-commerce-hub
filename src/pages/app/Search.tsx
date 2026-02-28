@@ -31,6 +31,7 @@ import { useCreateSavedSearch } from '@/hooks/use-saved-searches';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { AISearchAssistant } from '@/components/search/AISearchAssistant';
 
 const conditionOptions = [
   { value: 'new', label: 'Novo' },
@@ -399,6 +400,9 @@ export default function SearchPage() {
           </div>
         </div>
       </div>
+
+      {/* AI Search Assistant */}
+      <AISearchAssistant />
     </AppLayout>
   );
 }
