@@ -80,17 +80,28 @@ export default function ProductDetail() {
   const handleContact = async () => {
     if (!user) {
       toast({ title: 'Faça login para entrar em contato', variant: 'destructive' });
+      navigate('/auth/login');
+      return;
+    }
+
+    if (!product.store?.id) {
+      toast({ title: 'Loja não encontrada para este produto', variant: 'destructive' });
       return;
     }
 
     try {
       const conversation = await createConversation.mutateAsync({
-        storeId: product.store!.id,
+        storeId: product.store.id,
         productId: product.id,
       });
       navigate(`/app/chat/${conversation.id}`);
-    } catch {
-      toast({ title: 'Erro ao iniciar conversa', variant: 'destructive' });
+    } catch (err: any) {
+      console.error('Create conversation error:', err);
+      toast({ 
+        title: 'Erro ao iniciar conversa', 
+        description: err?.message || 'Tente novamente.',
+        variant: 'destructive' 
+      });
     }
   };
 
