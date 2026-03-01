@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Bell, TrendingUp, Sparkles, Store, BadgeCheck, ShoppingBag } from 'lucide-react';
+import { Bell, TrendingUp, Sparkles, Store, BadgeCheck, ShoppingBag, Package, ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,11 +9,14 @@ import { ProductCard } from '@/components/marketplace/ProductCard';
 import { VerifiedStoresSection } from '@/components/marketplace/VerifiedStoresSection';
 import { TrustSignals } from '@/components/marketplace/TrustSignals';
 import { CryptoUSPBanner } from '@/components/marketplace/CryptoUSPBanner';
+import { SponsoredCarousel, DealsCarousel, TrendingCarousel } from '@/components/marketplace/CarouselSection';
 import { WalletMiniWidget } from '@/components/wallet/WalletMiniWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/hooks/use-products';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { EmptyStateCard } from '@/components/common/EmptyStateCard';
+import { getProductGrid, getSection } from '@/lib/responsive-constants';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   const { profile } = useAuth();
