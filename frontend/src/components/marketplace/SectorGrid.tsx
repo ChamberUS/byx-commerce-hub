@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useSectors } from '@/hooks/use-categories';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import { getCategoryGrid } from '@/lib/responsive-constants';
 
 // Static fallback images by slug
 import electronicsImg from '@/assets/categories/electronics.jpg';
@@ -25,14 +28,24 @@ const fallbackImages: Record<string, string> = {
 
 export function SectorGrid() {
   const { data: sectors, isLoading } = useSectors();
+  const isMobile = useIsMobile();
 
   if (isLoading) {
     return (
-      <div className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide">
-        {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="flex flex-col items-center gap-2 min-w-[100px]">
-            <Skeleton className="w-[120px] h-[120px] rounded-full" />
-            <Skeleton className="h-4 w-20" />
+      <div className={cn(
+        getCategoryGrid(),
+        'animate-pulse'
+      )}>
+        {Array.from({ length: isMobile ? 4 : 7 }).map((_, i) => (
+          <div key={i} className="flex flex-col items-center gap-2">
+            <Skeleton className={cn(
+              'rounded-full',
+              isMobile ? 'w-16 h-16' : 'w-20 h-20 md:w-24 md:h-24'
+            )} />
+            <Skeleton className={cn(
+              'h-3',
+              isMobile ? 'w-12' : 'w-16'
+            )} />
           </div>
         ))}
       </div>
@@ -42,16 +55,22 @@ export function SectorGrid() {
   if (!sectors?.length) return null;
 
   return (
-    <div className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide">
+    <div className={getCategoryGrid()}>
       {sectors.map((sector) => {
         const img = sector.image_url || fallbackImages[sector.slug] || null;
         return (
           <Link
             key={sector.id}
             to={`/app/search?sector=${sector.slug}`}
-            className="flex flex-col items-center gap-2 min-w-[100px] group shrink-0"
+            className="flex flex-col items-center gap-2 group"
           >
-            <div className="w-[120px] h-[120px] rounded-full bg-muted overflow-hidden border-2 border-transparent group-hover:border-primary/40 transition-all">
+            {/* Icon/Image - Touch-friendly no mobile */}
+            <div className={cn(
+              'rounded-full bg-muted overflow-hidden border-2 border-transparent',
+              'group-hover:border-primary/40 transition-all',
+              'group-active:scale-95',
+              isMobile ? 'w-16 h-16' : 'w-20 h-20 md:w-24 md:h-24'
+            )}>
               {img ? (
                 <img
                   src={img}
@@ -60,12 +79,21 @@ export function SectorGrid() {
                   loading="lazy"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-3xl">
+                <div className={cn(
+                  'w-full h-full flex items-center justify-center',
+                  isMobile ? 'text-2xl' : 'text-2xl md:text-3xl'
+                )}>
                   {sector.emoji}
                 </div>
               )}
             </div>
-            <span className="text-sm font-medium text-foreground text-center line-clamp-1 group-hover:text-primary transition-colors">
+            
+            {/* Label */}
+            <span className={cn(
+              'font-medium text-foreground text-center line-clamp-1',
+              'group-hover:text-primary transition-colors',
+              isMobile ? 'text-xs' : 'text-xs md:text-sm'
+            )}>
               {sector.name}
             </span>
           </Link>
