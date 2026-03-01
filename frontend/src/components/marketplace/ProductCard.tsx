@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useToggleFavoriteProduct, useIsProductFavorite } from '@/hooks/use-favorites';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { Product } from '@/hooks/use-products';
 
 interface ProductCardProps {
@@ -14,6 +15,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, className }: ProductCardProps) {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { data: isFavorite } = useIsProductFavorite(product.id);
   const toggleFavorite = useToggleFavoriteProduct();
 
@@ -46,7 +48,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
     <Link 
       to={`/app/product/${product.id}`}
       className={cn(
-        'group block bg-card rounded-2xl border overflow-hidden transition-all hover:shadow-lg hover:border-primary/30',
+        'group block bg-card rounded-2xl border overflow-hidden',
+        'transition-all hover:shadow-lg hover:border-primary/30',
+        // Touch-friendly no mobile
+        'active:scale-[0.98]',
         className
       )}
     >
@@ -56,62 +61,89 @@ export function ProductCard({ product, className }: ProductCardProps) {
           src={primaryImage}
           alt={product.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
         />
         
-        {/* Favorite Button */}
+        {/* Favorite Button - Touch optimized */}
         {user && (
           <Button
             size="icon"
             variant="secondary"
             className={cn(
-              'absolute top-2 right-2 h-8 w-8 rounded-full shadow-md',
+              'absolute rounded-full shadow-md backdrop-blur-sm',
+              // Mobile: maior e melhor posicionado
+              isMobile ? 'top-2 right-2 h-9 w-9' : 'top-2 right-2 h-8 w-8',
               isFavorite && 'bg-destructive/10 text-destructive hover:bg-destructive/20'
             )}
             onClick={handleFavoriteClick}
           >
-            <Heart className={cn('h-4 w-4', isFavorite && 'fill-current')} />
+            <Heart className={cn(
+              isMobile ? 'h-5 w-5' : 'h-4 w-4',
+              isFavorite && 'fill-current'
+            )} />
           </Button>
         )}
 
-        {/* Condition Badge */}
-        <Badge
-          variant="secondary"
-          className="absolute bottom-2 left-2 text-xs"
-        >
-          {conditionLabels[product.condition]}
-        </Badge>
-
-        {/* Offers Badge */}
-        {product.allow_offers && (
+        {/* Badges - Mobile optimized */}
+        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1">
           <Badge
-            className="absolute bottom-2 right-2 text-xs bg-success text-success-foreground"
+            variant="secondary"
+            className={cn('backdrop-blur-sm', isMobile ? 'text-[10px] px-1.5 py-0.5' : 'text-xs')}
           >
-            Aceita oferta
+            {conditionLabels[product.condition]}
           </Badge>
-        )}
+
+          {product.allow_offers && (
+            <Badge
+              className={cn(
+                'bg-success/90 text-success-foreground backdrop-blur-sm',
+                isMobile ? 'text-[10px] px-1.5 py-0.5' : 'text-xs'
+              )}
+            >
+              Aceita oferta
+            </Badge>
+          )}
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="p-3">
-        <h3 className="font-medium text-sm line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+      {/* Content - Padding responsivo */}
+      <div className={cn(isMobile ? 'p-2.5' : 'p-3')}>
+        <h3 className={cn(
+          'font-medium line-clamp-2 mb-1.5 group-hover:text-primary transition-colors',
+          isMobile ? 'text-xs leading-tight' : 'text-sm'
+        )}>
           {product.title}
         </h3>
         
-        <div className="flex items-baseline gap-1 mb-2">
-          <span className="text-lg font-bold text-primary">
+        {/* Price - Tamanho ajustado para mobile */}
+        <div className="flex items-baseline gap-1 mb-1.5">
+          <span className={cn(
+            'font-bold text-primary',
+            isMobile ? 'text-base' : 'text-lg'
+          )}>
             {formatPrice(product.price)}
           </span>
-          <span className="text-xs text-muted-foreground">BYX</span>
+          <span className={cn(
+            'text-muted-foreground',
+            isMobile ? 'text-[10px]' : 'text-xs'
+          )}>
+            BYX
+          </span>
         </div>
 
-        {/* Store Info */}
+        {/* Store Info - Menor no mobile */}
         {product.store && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className={cn(
+            'flex items-center gap-1 text-muted-foreground',
+            isMobile ? 'text-[10px]' : 'text-xs'
+          )}>
             {product.store.city && (
               <>
-                <MapPin className="h-3 w-3" />
-                <span>{product.store.city}</span>
-                {product.store.state && <span>- {product.store.state}</span>}
+                <MapPin className={cn(isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3')} />
+                <span className="line-clamp-1">
+                  {product.store.city}
+                  {product.store.state && ` - ${product.store.state}`}
+                </span>
               </>
             )}
           </div>
