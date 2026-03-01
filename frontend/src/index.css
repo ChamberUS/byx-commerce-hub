@@ -131,6 +131,16 @@
   .animate-scale-in {
     animation: scaleIn 0.3s ease-out;
   }
+
+  /* Hide scrollbar mas mantém scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @keyframes fadeIn {
