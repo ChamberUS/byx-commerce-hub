@@ -22,14 +22,22 @@ export default function Home() {
   const { profile } = useAuth();
   const isMobile = useIsMobile();
   
+  // Fetch multiple product sets for different sections
   const { data: featuredProducts, isLoading: loadingFeatured } = useProducts({ 
-    limit: 8, 
+    limit: 12, 
     sort_by: 'rating' 
   });
   
   const { data: recentProducts, isLoading: loadingRecent } = useProducts({ 
-    limit: 8, 
+    limit: 12, 
     sort_by: 'newest' 
+  });
+
+  // Simular "ofertas do dia" (produtos com allow_offers)
+  const { data: dealsProducts, isLoading: loadingDeals } = useProducts({
+    limit: 12,
+    allow_offers: true,
+    sort_by: 'newest'
   });
 
   const initials = profile?.nome
@@ -41,7 +49,7 @@ export default function Home() {
         .toUpperCase()
     : 'U';
 
-  const hasProducts = (featuredProducts && featuredProducts.length > 0) || (recentProducts && recentProducts.length > 0);
+  const firstName = profile?.nome?.split(' ')[0] || 'Usuário';
 
   return (
     <AppLayout>
