@@ -47,6 +47,9 @@ import SellerProducts from "./pages/seller/Products";
 import ProductForm from "./pages/seller/ProductForm";
 import CreateListingWizard from "./pages/seller/CreateListingWizard";
 import StoreOrders from "./pages/seller/StoreOrders";
+import StoreOrderDetail from "./pages/seller/StoreOrderDetail";
+import StoreReturns from "./pages/seller/StoreReturns";
+import ShippingLabel from "./pages/seller/ShippingLabel";
 import QuickReplies from "./pages/seller/QuickReplies";
 
 // Legal pages
@@ -110,7 +113,9 @@ const App = () => (
               <Route path="/app/store/products/new" element={<AuthGuard requireAuth requireOnboarding><CreateListingWizard /></AuthGuard>} />
               <Route path="/app/store/products/:id/edit" element={<AuthGuard requireAuth requireOnboarding><ProductForm /></AuthGuard>} />
               <Route path="/app/store/orders" element={<AuthGuard requireAuth requireOnboarding><StoreOrders /></AuthGuard>} />
-              <Route path="/app/store/orders/:id" element={<AuthGuard requireAuth requireOnboarding><OrderDetail /></AuthGuard>} />
+              <Route path="/app/store/orders/:id" element={<AuthGuard requireAuth requireOnboarding><StoreOrderDetail /></AuthGuard>} />
+              <Route path="/app/store/orders/:id/label" element={<AuthGuard requireAuth requireOnboarding><ShippingLabel /></AuthGuard>} />
+              <Route path="/app/store/returns" element={<AuthGuard requireAuth requireOnboarding><StoreReturns /></AuthGuard>} />
               <Route path="/app/store/quick-replies" element={<AuthGuard requireAuth requireOnboarding><QuickReplies /></AuthGuard>} />
                <Route path="/app/faq" element={<AuthGuard requireAuth requireOnboarding><FAQ /></AuthGuard>} />
               

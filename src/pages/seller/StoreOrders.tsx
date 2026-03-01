@@ -39,6 +39,7 @@ const statusConfig = {
   pending: { label: 'Pendente', color: 'bg-warning/10 text-warning', icon: Clock },
   confirmed: { label: 'Confirmado', color: 'bg-primary/10 text-primary', icon: CheckCircle2 },
   paid: { label: 'Pago', color: 'bg-success/10 text-success', icon: CheckCircle2 },
+  awaiting_shipment: { label: 'Preparando', color: 'bg-accent text-accent-foreground', icon: Package },
   shipped: { label: 'Enviado', color: 'bg-primary/10 text-primary', icon: Truck },
   delivered: { label: 'Entregue', color: 'bg-success/10 text-success', icon: CheckCircle2 },
   cancelled: { label: 'Cancelado', color: 'bg-destructive/10 text-destructive', icon: Clock },
@@ -126,7 +127,8 @@ export default function StoreOrders() {
     switch (currentStatus) {
       case 'pending': return ['confirmed', 'cancelled'];
       case 'confirmed': return ['paid', 'cancelled'];
-      case 'paid': return ['shipped'];
+      case 'paid': return ['awaiting_shipment', 'cancelled'];
+      case 'awaiting_shipment': return ['shipped'];
       case 'shipped': return ['delivered'];
       default: return [];
     }

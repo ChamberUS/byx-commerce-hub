@@ -572,7 +572,9 @@ export type Database = {
       }
       orders: {
         Row: {
+          awaiting_shipment_at: string | null
           buyer_id: string
+          carrier: string | null
           created_at: string | null
           delivered_at: string | null
           id: string
@@ -586,10 +588,14 @@ export type Database = {
           store_id: string
           subtotal: number
           total: number
+          tracking_code: string | null
+          tracking_url: string | null
           updated_at: string | null
         }
         Insert: {
+          awaiting_shipment_at?: string | null
           buyer_id: string
+          carrier?: string | null
           created_at?: string | null
           delivered_at?: string | null
           id?: string
@@ -603,10 +609,14 @@ export type Database = {
           store_id: string
           subtotal: number
           total: number
+          tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string | null
         }
         Update: {
+          awaiting_shipment_at?: string | null
           buyer_id?: string
+          carrier?: string | null
           created_at?: string | null
           delivered_at?: string | null
           id?: string
@@ -620,6 +630,8 @@ export type Database = {
           store_id?: string
           subtotal?: number
           total?: number
+          tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -881,6 +893,63 @@ export type Database = {
           },
         ]
       }
+      returns: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          details: string | null
+          id: string
+          order_id: string
+          reason: string
+          return_label_url: string | null
+          return_tracking_code: string | null
+          status: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          order_id: string
+          reason: string
+          return_label_url?: string | null
+          return_tracking_code?: string | null
+          status?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          order_id?: string
+          reason?: string
+          return_label_url?: string | null
+          return_tracking_code?: string | null
+          status?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "returns_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "returns_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_searches: {
         Row: {
           created_at: string | null
@@ -997,6 +1066,7 @@ export type Database = {
           is_verified: boolean | null
           logo_url: string | null
           name: string
+          origin_address: Json | null
           owner_id: string
           rating_avg: number | null
           rating_count: number | null
@@ -1018,6 +1088,7 @@ export type Database = {
           is_verified?: boolean | null
           logo_url?: string | null
           name: string
+          origin_address?: Json | null
           owner_id: string
           rating_avg?: number | null
           rating_count?: number | null
@@ -1039,6 +1110,7 @@ export type Database = {
           is_verified?: boolean | null
           logo_url?: string | null
           name?: string
+          origin_address?: Json | null
           owner_id?: string
           rating_avg?: number | null
           rating_count?: number | null
@@ -1050,6 +1122,44 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: []
+      }
+      tracking_history: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          location: string | null
+          occurred_at: string
+          order_id: string
+          status_code: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          location?: string | null
+          occurred_at?: string
+          order_id: string
+          status_code: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string | null
+          occurred_at?: string
+          order_id?: string
+          status_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracking_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -1152,6 +1262,7 @@ export type Database = {
         | "delivered"
         | "cancelled"
         | "refunded"
+        | "awaiting_shipment"
       product_condition: "new" | "used" | "refurbished"
       product_status: "draft" | "active" | "paused" | "sold" | "deleted"
       user_type: "cliente" | "lojista"
@@ -1303,6 +1414,7 @@ export const Constants = {
         "delivered",
         "cancelled",
         "refunded",
+        "awaiting_shipment",
       ],
       product_condition: ["new", "used", "refurbished"],
       product_status: ["draft", "active", "paused", "sold", "deleted"],
