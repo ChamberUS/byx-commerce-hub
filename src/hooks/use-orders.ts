@@ -5,12 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface OrderItem {
   id: string;
   order_id: string;
-  product_id: string | null;
-  variation_id: string | null;
+  product_id?: string | null;
+  variation_id?: string | null;
   title: string;
   price: number;
   quantity: number;
-  created_at: string;
+  created_at?: string;
   product?: {
     id: string;
     slug: string;
@@ -23,15 +23,19 @@ export interface Order {
   order_number: string;
   buyer_id: string;
   store_id: string;
-  status: 'pending' | 'confirmed' | 'paid' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+  status: 'pending' | 'confirmed' | 'paid' | 'awaiting_shipment' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
   subtotal: number;
   shipping_cost: number;
   total: number;
   shipping_address: Record<string, string> | null;
   notes: string | null;
+  carrier: string | null;
+  tracking_code: string | null;
+  tracking_url: string | null;
   created_at: string;
   updated_at: string;
   paid_at: string | null;
+  awaiting_shipment_at: string | null;
   shipped_at: string | null;
   delivered_at: string | null;
   store?: {
@@ -71,7 +75,7 @@ export function useBuyerOrders() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Order[];
+      return data as unknown as Order[];
     },
     enabled: !!user?.id,
   });
@@ -110,7 +114,7 @@ export function useStoreOrders(storeId: string, status?: string) {
       return orders.map(order => ({
         ...order,
         buyer_profile: profiles?.find(p => p.id === order.buyer_id),
-      })) as Order[];
+      })) as unknown as Order[];
     },
     enabled: !!storeId,
   });
@@ -145,7 +149,7 @@ export function useOrder(orderId: string) {
         return {
           ...data,
           buyer_profile: profile,
-        } as Order;
+        } as unknown as Order;
       }
 
       return null;
@@ -224,13 +228,21 @@ export function useUpdateOrderStatus() {
     mutationFn: async (data: {
       orderId: string;
       status: Order['status'];
+      carrier?: string;
+      tracking_code?: string;
+      tracking_url?: string;
     }) => {
-      const updateData: Partial<Order> = { status: data.status };
+      const updateData: Record<string, unknown> = { status: data.status };
 
       if (data.status === 'paid') {
         updateData.paid_at = new Date().toISOString();
+      } else if (data.status === 'awaiting_shipment') {
+        updateData.awaiting_shipment_at = new Date().toISOString();
       } else if (data.status === 'shipped') {
         updateData.shipped_at = new Date().toISOString();
+        if (data.carrier) updateData.carrier = data.carrier;
+        if (data.tracking_code) updateData.tracking_code = data.tracking_code;
+        if (data.tracking_url) updateData.tracking_url = data.tracking_url;
       } else if (data.status === 'delivered') {
         updateData.delivered_at = new Date().toISOString();
       }
@@ -243,7 +255,7 @@ export function useUpdateOrderStatus() {
         .single();
 
       if (error) throw error;
-      return order as Order;
+      return order as unknown as Order;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['order', variables.orderId] });

@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, ShoppingCart, MessageCircle, 
-  Zap, Settings, BarChart3 
+  Zap, Settings, RotateCcw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -9,9 +9,10 @@ const navItems = [
   { path: '/app/store', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/app/store/products', icon: Package, label: 'Anúncios' },
   { path: '/app/store/orders', icon: ShoppingCart, label: 'Pedidos' },
+  { path: '/app/store/returns', icon: RotateCcw, label: 'Devoluções' },
   { path: '/app/chat', icon: MessageCircle, label: 'Mensagens' },
   { path: '/app/store/quick-replies', icon: Zap, label: 'Respostas' },
-  { path: '/app/store/edit', icon: Settings, label: 'Configurações' },
+  { path: '/app/store/edit', icon: Settings, label: 'Config' },
 ];
 
 export function SellerNav() {
