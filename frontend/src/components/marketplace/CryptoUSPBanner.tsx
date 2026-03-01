@@ -1,27 +1,76 @@
 import { Link } from 'react-router-dom';
 import { Coins, ArrowRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 export function CryptoUSPBanner() {
+  const isMobile = useIsMobile();
+
   return (
-    <section className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 border border-primary/20">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-          <Coins className="h-6 w-6 text-primary" />
+    <Link 
+      to="/app/wallet"
+      className={cn(
+        'block rounded-2xl overflow-hidden border group cursor-pointer',
+        // Glassmorphism effect
+        'bg-gradient-to-br from-primary/10 via-primary/5 to-transparent',
+        'border-primary/20 backdrop-blur-xl',
+        // Hover animations (desktop)
+        'transition-all duration-300',
+        'hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30',
+        'hover:scale-[1.01]',
+        // Mobile touch effect
+        'active:scale-[0.99]'
+      )}
+    >
+      <div className={cn(
+        'p-4 md:p-6',
+        'flex items-center gap-3 md:gap-4',
+        // Subtle shimmer effect
+        'relative overflow-hidden'
+      )}>
+        {/* Shimmer overlay (subtle) */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
         </div>
-        <div className="flex-1">
-          <h3 className="font-semibold mb-1">Pagamentos com AIOS/BYX</h3>
-          <p className="text-sm text-muted-foreground">
+
+        {/* Icon */}
+        <div className={cn(
+          'rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0',
+          'transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110',
+          isMobile ? 'w-10 h-10' : 'w-12 h-12'
+        )}>
+          <Coins className={cn(
+            'text-primary',
+            isMobile ? 'h-5 w-5' : 'h-6 w-6'
+          )} />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <h3 className={cn(
+            'font-semibold mb-0.5 md:mb-1',
+            isMobile ? 'text-sm' : 'text-base'
+          )}>
+            Pagamentos com AIOS/BYX
+          </h3>
+          <p className={cn(
+            'text-muted-foreground line-clamp-2 md:line-clamp-1',
+            isMobile ? 'text-xs' : 'text-sm'
+          )}>
             Compre e venda usando tokens AIOS — rápido, seguro e sem taxas abusivas.
           </p>
         </div>
-        <Link 
-          to="/app/wallet" 
-          className="flex items-center gap-1 text-primary text-sm font-medium hover:underline whitespace-nowrap"
-        >
-          Como funciona
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+
+        {/* CTA */}
+        <div className={cn(
+          'flex items-center gap-1 text-primary font-medium whitespace-nowrap flex-shrink-0',
+          'transition-transform group-hover:translate-x-1',
+          isMobile ? 'text-xs' : 'text-sm'
+        )}>
+          <span className="hidden md:inline">Como funciona</span>
+          <ArrowRight className={cn(isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
+        </div>
       </div>
-    </section>
+    </Link>
   );
 }
