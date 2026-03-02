@@ -1,0 +1,14 @@
+{
+  "name": "buynnex-marketplace",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "cd frontend && npx --yes vite@5 --host",
+    "build": "cd frontend && npx --yes vite@5 build",
+    "preview": "cd frontend && npx --yes vite@5 preview"
+  },
+  "dependencies": {
+    "vite": "^5.4.19"
+  }
+}
