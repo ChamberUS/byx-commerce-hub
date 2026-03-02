@@ -51,6 +51,7 @@ import StoreOrderDetail from "./pages/seller/StoreOrderDetail";
 import StoreReturns from "./pages/seller/StoreReturns";
 import ShippingLabel from "./pages/seller/ShippingLabel";
 import QuickReplies from "./pages/seller/QuickReplies";
+import PostSale from "./pages/seller/PostSale";
 
 // Legal pages
 import LegalTerms from "./pages/legal/Terms";
@@ -107,6 +108,7 @@ const App = () => (
               
               {/* Seller Hub */}
               <Route path="/app/store" element={<AuthGuard requireAuth requireOnboarding><SellerDashboard /></AuthGuard>} />
+              <Route path="/app/store/post-sale" element={<AuthGuard requireAuth requireOnboarding><PostSale /></AuthGuard>} />
               <Route path="/app/store/create" element={<AuthGuard requireAuth requireOnboarding><CreateStore /></AuthGuard>} />
               <Route path="/app/store/edit" element={<AuthGuard requireAuth requireOnboarding><EditStore /></AuthGuard>} />
               <Route path="/app/store/products" element={<AuthGuard requireAuth requireOnboarding><SellerProducts /></AuthGuard>} />
