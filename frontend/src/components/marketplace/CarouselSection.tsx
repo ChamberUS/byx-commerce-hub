@@ -47,7 +47,7 @@ export function CarouselSection({
   const scroll = (direction: 'left' | 'right') => {
     if (!scrollRef.current) return;
     
-    const scrollAmount = isMobile ? 280 : 320;
+    const scrollAmount = isMobile ? 240 : 320;
     const newScrollLeft = scrollRef.current.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount);
     
     scrollRef.current.scrollTo({
