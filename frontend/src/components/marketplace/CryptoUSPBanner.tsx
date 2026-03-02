@@ -14,10 +14,10 @@ export function CryptoUSPBanner() {
         // Glassmorphism effect
         'bg-gradient-to-br from-primary/10 via-primary/5 to-transparent',
         'border-primary/20 backdrop-blur-xl',
-        // Hover animations (desktop)
+        // Hover animations (desktop) - respecting motion preferences
         'transition-all duration-300',
         'hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30',
-        'hover:scale-[1.01]',
+        'motion-safe:hover:scale-[1.01]',
         // Mobile touch effect
         'active:scale-[0.99]'
       )}
@@ -28,15 +28,15 @@ export function CryptoUSPBanner() {
         // Subtle shimmer effect
         'relative overflow-hidden'
       )}>
-        {/* Shimmer overlay (subtle) */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+        {/* Shimmer overlay (only on hover, respecting motion) */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 motion-reduce:hidden">
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/5 to-transparent motion-safe:animate-shimmer" />
         </div>
 
         {/* Icon */}
         <div className={cn(
           'rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0',
-          'transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110',
+          'transition-transform duration-300 motion-safe:group-hover:rotate-12 motion-safe:group-hover:scale-110',
           isMobile ? 'w-10 h-10' : 'w-12 h-12'
         )}>
           <Coins className={cn(
@@ -64,7 +64,7 @@ export function CryptoUSPBanner() {
         {/* CTA */}
         <div className={cn(
           'flex items-center gap-1 text-primary font-medium whitespace-nowrap flex-shrink-0',
-          'transition-transform group-hover:translate-x-1',
+          'transition-transform motion-safe:group-hover:translate-x-1',
           isMobile ? 'text-xs' : 'text-sm'
         )}>
           <span className="hidden md:inline">Como funciona</span>
