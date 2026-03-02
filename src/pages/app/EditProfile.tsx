@@ -93,11 +93,17 @@ export default function EditProfile() {
   };
 
   const handleSave = async () => {
-    if (!nome.trim()) {
-      toast({
-        variant: 'destructive',
-        title: 'Nome obrigatório',
-      });
+    const trimmedName = nome.trim();
+    if (!trimmedName) {
+      toast({ variant: 'destructive', title: 'Nome obrigatório' });
+      return;
+    }
+    if (trimmedName.length > 100) {
+      toast({ variant: 'destructive', title: 'Nome muito longo', description: 'Máximo 100 caracteres.' });
+      return;
+    }
+    if (!/^[\p{L}\s'-]+$/u.test(trimmedName)) {
+      toast({ variant: 'destructive', title: 'Nome inválido', description: 'Use apenas letras, espaços, hifens e apóstrofos.' });
       return;
     }
 
@@ -214,7 +220,8 @@ export default function EditProfile() {
           <Input
             id="nome"
             value={nome}
-            onChange={(e) => setNome(e.target.value)}
+            onChange={(e) => setNome(e.target.value.slice(0, 100))}
+            maxLength={100}
             placeholder="Seu nome"
             className="rounded-xl h-12"
           />

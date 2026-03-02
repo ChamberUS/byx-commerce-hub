@@ -42,7 +42,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const fetchWallet = async (userId: string) => {
     const { data, error } = await supabase
       .from('wallets')
-      .select('*')
+      .select('id, user_id, address, wallet_type, status, has_biometric, created_at, updated_at')
       .eq('user_id', userId)
       .maybeSingle();
 

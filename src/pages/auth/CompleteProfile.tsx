@@ -30,11 +30,30 @@ export default function CompleteProfile() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!nome.trim()) {
+    const trimmedName = nome.trim();
+    if (!trimmedName) {
       toast({
         variant: 'destructive',
         title: 'Nome obrigatório',
         description: 'Digite seu nome para continuar.',
+      });
+      return;
+    }
+
+    if (trimmedName.length > 100) {
+      toast({
+        variant: 'destructive',
+        title: 'Nome muito longo',
+        description: 'O nome deve ter no máximo 100 caracteres.',
+      });
+      return;
+    }
+
+    if (!/^[\p{L}\s'-]+$/u.test(trimmedName)) {
+      toast({
+        variant: 'destructive',
+        title: 'Nome inválido',
+        description: 'Use apenas letras, espaços, hifens e apóstrofos.',
       });
       return;
     }
@@ -98,7 +117,8 @@ export default function CompleteProfile() {
                 type="text"
                 placeholder="Seu nome"
                 value={nome}
-                onChange={(e) => setNome(e.target.value)}
+                onChange={(e) => setNome(e.target.value.slice(0, 100))}
+                maxLength={100}
                 className="h-12 rounded-xl"
                 autoFocus
               />

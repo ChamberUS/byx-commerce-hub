@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event, newSession) => {
         if (!isMounted) return;
 
-        console.log('[AuthContext] Auth event:', event);
+        if (import.meta.env.DEV) console.log('[AuthContext] Auth event:', event);
         setSession(newSession);
         setUser(newSession?.user ?? null);
 

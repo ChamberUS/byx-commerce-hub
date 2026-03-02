@@ -1,4 +1,4 @@
-// BIP39 wordlist (simplified - first 100 words for demo)
+// BIP39 wordlist (simplified - first 200 words for demo)
 // In production, use full 2048 BIP39 wordlist
 const BIP39_WORDLIST = [
   'abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract',
@@ -28,42 +28,90 @@ const BIP39_WORDLIST = [
   'blossom', 'blouse', 'blue', 'blur', 'blush', 'board', 'boat', 'body',
 ];
 
-// Generate a random seed phrase (12 or 24 words)
+// Generate a random seed phrase (12 or 24 words) using crypto-safe RNG
 export function generateSeedPhrase(wordCount: 12 | 24 = 12): string[] {
   const words: string[] = [];
   const usedIndices = new Set<number>();
+  const randomValues = new Uint32Array(wordCount);
+  crypto.getRandomValues(randomValues);
   
+  let i = 0;
   while (words.length < wordCount) {
-    const randomIndex = Math.floor(Math.random() * BIP39_WORDLIST.length);
+    const randomIndex = randomValues[i % randomValues.length] % BIP39_WORDLIST.length;
     if (!usedIndices.has(randomIndex)) {
       usedIndices.add(randomIndex);
       words.push(BIP39_WORDLIST[randomIndex]);
+    }
+    i++;
+    // Generate more random values if needed
+    if (i >= randomValues.length && words.length < wordCount) {
+      crypto.getRandomValues(randomValues);
+      i = 0;
     }
   }
   
   return words;
 }
 
-// Generate a mock wallet address
+// Generate a mock wallet address using crypto-safe RNG
 export function generateWalletAddress(): string {
-  const chars = '0123456789abcdef';
+  const bytes = new Uint8Array(19);
+  crypto.getRandomValues(bytes);
   let address = 'byx1';
-  for (let i = 0; i < 38; i++) {
-    address += chars[Math.floor(Math.random() * chars.length)];
+  for (const byte of bytes) {
+    address += byte.toString(16).padStart(2, '0');
   }
   return address;
 }
 
-// Simple hash function for PIN (in production use proper crypto)
-export function hashPin(pin: string): string {
-  return btoa(pin + 'byx_salt_' + pin.split('').reverse().join(''));
+// Hash PIN using Web Crypto API (SHA-256 with salt)
+export async function hashPin(pin: string): Promise<string> {
+  const salt = 'byx_wallet_pin_v1';
+  const encoder = new TextEncoder();
+  const data = encoder.encode(salt + pin);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Encrypt seed phrase (simple XOR for demo - use proper encryption in production)
-export function encryptSeedPhrase(words: string[], pin: string): string {
+// Encrypt seed phrase using AES-GCM derived from PIN
+export async function encryptSeedPhrase(words: string[], pin: string): Promise<string> {
   const phrase = words.join(' ');
-  const key = hashPin(pin);
-  return btoa(phrase + '::' + key);
+  const encoder = new TextEncoder();
+
+  // Derive key from PIN using PBKDF2
+  const pinKey = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(pin),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const aesKey = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    pinKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt']
+  );
+
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    aesKey,
+    encoder.encode(phrase)
+  );
+
+  // Pack salt + iv + ciphertext into base64
+  const packed = new Uint8Array(salt.length + iv.length + new Uint8Array(ciphertext).length);
+  packed.set(salt, 0);
+  packed.set(iv, salt.length);
+  packed.set(new Uint8Array(ciphertext), salt.length + iv.length);
+
+  return btoa(String.fromCharCode(...packed));
 }
 
 // Validate seed phrase
