@@ -10,4 +10,3 @@
     "preview": "cd frontend && bunx --bun vite preview --host --port 8080"
   }
 }
-}
