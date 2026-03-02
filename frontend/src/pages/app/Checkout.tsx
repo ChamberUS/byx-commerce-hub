@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Minus, Plus, Trash2, MapPin, CreditCard, Wallet, Loader2, Shield, Check } from 'lucide-react';
+import { ArrowLeft, Package, Minus, Plus, Trash2, MapPin, CreditCard, Wallet, Loader2, Shield, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +10,13 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { PageContainer } from '@/components/common/PageContainer';
 import { useCreateOrder, useUpdateOrderStatus } from '@/hooks/use-orders';
 import { useProduct } from '@/hooks/use-products';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface CartItem {
   productId: string;
