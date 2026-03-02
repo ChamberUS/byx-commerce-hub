@@ -159,7 +159,7 @@ function CarouselCard({ product }: CarouselCardProps) {
     <Link
       to={`/app/product/${product.id}`}
       className={cn(
-        'flex-shrink-0 w-[260px] md:w-[300px] snap-start',
+        'flex-shrink-0 w-[220px] xs:w-[240px] md:w-[280px] lg:w-[300px] snap-start',
         'bg-card rounded-xl border overflow-hidden',
         'transition-all hover:shadow-lg hover:border-primary/30',
         'group'
