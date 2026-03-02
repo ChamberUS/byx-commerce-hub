@@ -4,12 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cd frontend && bun install && bunx --bun vite --host --port 8080",
-    "build": "cd frontend && bun install && bunx --bun vite build",
-    "build:dev": "cd frontend && bun install && bunx --bun vite build --mode development",
-    "preview": "cd frontend && bun install && bunx --bun vite preview"
-  },
-  "dependencies": {
-    "vite": "^5.4.19"
+    "dev": "cd frontend && bun install --frozen-lockfile 2>/dev/null; cd frontend && bunx --bun vite --host --port 8080",
+    "build": "cd frontend && bun install --frozen-lockfile 2>/dev/null; cd frontend && bunx --bun vite build",
+    "build:dev": "cd frontend && bun install --frozen-lockfile 2>/dev/null; cd frontend && bunx --bun vite build --mode development",
+    "preview": "cd frontend && bunx --bun vite preview --host --port 8080"
   }
+}
 }
