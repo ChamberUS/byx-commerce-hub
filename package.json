@@ -4,9 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cd frontend && npx --yes vite@5 --host",
-    "build": "cd frontend && npx --yes vite@5 build",
-    "preview": "cd frontend && npx --yes vite@5 preview"
+    "dev": "cd frontend && bun install && bunx --bun vite --host --port 8080",
+    "build": "cd frontend && bun install && bunx --bun vite build",
+    "build:dev": "cd frontend && bun install && bunx --bun vite build --mode development",
+    "preview": "cd frontend && bun install && bunx --bun vite preview"
   },
   "dependencies": {
     "vite": "^5.4.19"
