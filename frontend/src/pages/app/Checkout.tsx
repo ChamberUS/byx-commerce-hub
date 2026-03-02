@@ -40,6 +40,7 @@ type CheckoutStep = 'review' | 'address' | 'payment' | 'confirmation';
 export default function Checkout() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const createOrder = useCreateOrder();
   const updateOrderStatus = useUpdateOrderStatus();
   
@@ -47,6 +48,7 @@ export default function Checkout() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [storeId, setStoreId] = useState<string>('');
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [summaryOpen, setSummaryOpen] = useState(!isMobile); // Collapsible no mobile
   const [shippingAddress, setShippingAddress] = useState({
     street: '',
     number: '',
