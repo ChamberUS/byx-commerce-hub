@@ -98,8 +98,8 @@ export function WalletSetupWizard({ onComplete, onCancel }: WalletSetupWizardPro
     
     try {
       const address = generateWalletAddress();
-      const pinHash = hashPin(pinValue);
-      const encryptedSeed = encryptSeedPhrase(seedPhrase, pinValue);
+      const pinHash = await hashPin(pinValue);
+      const encryptedSeed = await encryptSeedPhrase(seedPhrase, pinValue);
 
       const { error } = await createWallet({
         address,
