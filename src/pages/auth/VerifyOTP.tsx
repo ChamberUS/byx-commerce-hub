@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2, Mail, CheckCircle } from 'lucide-react';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/button';
@@ -8,22 +8,19 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function VerifyOTP() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { signInWithOtp, user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const [resendLoading, setResendLoading] = useState(false);
   const [countdown, setCountdown] = useState(60);
-  const [emailSent, setEmailSent] = useState(true);
 
   const email = sessionStorage.getItem('byx_auth_email');
 
-  // Check if user arrived via magic link (already authenticated)
+  // If user arrives here already authenticated (e.g. magic link opened in same tab)
   useEffect(() => {
     if (!authLoading && user) {
-      // User is authenticated, redirect based on profile status
       if (profile?.onboarding_completo) {
-        navigate('/app/home', { replace: true });
+        navigate('/app', { replace: true });
       } else {
         navigate('/auth/complete-profile', { replace: true });
       }
@@ -31,10 +28,10 @@ export default function VerifyOTP() {
   }, [user, profile, authLoading, navigate]);
 
   useEffect(() => {
-    if (!email) {
+    if (!email && !authLoading && !user) {
       navigate('/auth/login', { replace: true });
     }
-  }, [email, navigate]);
+  }, [email, navigate, authLoading, user]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -56,7 +53,6 @@ export default function VerifyOTP() {
       }
 
       setCountdown(60);
-      setEmailSent(true);
       toast({
         title: 'Email reenviado',
         description: 'Verifique sua caixa de entrada.',
@@ -89,7 +85,6 @@ export default function VerifyOTP() {
   return (
     <AuthLayout>
       <div className="flex flex-col h-full">
-        {/* Header */}
         <div className="flex items-center p-4">
           <Button
             variant="ghost"
@@ -101,7 +96,6 @@ export default function VerifyOTP() {
           </Button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 px-6 pb-8 flex flex-col items-center justify-center">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
             <Mail className="h-10 w-10 text-primary" />

@@ -48,13 +48,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('[AuthContext] Error fetching profile:', error);
         return null;
       }
 
       return data as Profile;
     } catch (error) {
-      console.error('Unexpected error fetching profile:', error);
+      console.error('[AuthContext] Unexpected error fetching profile:', error);
       return null;
     }
   };
@@ -71,42 +71,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    // Set up auth state listener FIRST for ongoing changes
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         if (!isMounted) return;
-        
+
+        console.log('[AuthContext] Auth event:', event);
         setSession(newSession);
         setUser(newSession?.user ?? null);
 
-        // Fire and forget profile fetch for auth changes (not initial load)
         if (newSession?.user) {
-          fetchProfile(newSession.user.id).then((profileData) => {
-            if (isMounted) setProfile(profileData);
-          });
+          // Use setTimeout to avoid deadlock with Supabase internals
+          setTimeout(() => {
+            fetchProfile(newSession.user.id).then((profileData) => {
+              if (isMounted) setProfile(profileData);
+            });
+          }, 0);
         } else {
           setProfile(null);
         }
       }
     );
 
-    // THEN check for existing session (controls loading state)
+    // THEN check for existing session
     const initializeAuth = async () => {
       try {
         const { data: { session: existingSession } } = await supabase.auth.getSession();
-        
+
         if (!isMounted) return;
 
         setSession(existingSession);
         setUser(existingSession?.user ?? null);
 
-        // Fetch profile BEFORE setting loading to false
         if (existingSession?.user) {
           const profileData = await fetchProfile(existingSession.user.id);
           if (isMounted) setProfile(profileData);
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('[AuthContext] Error initializing auth:', error);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -121,8 +123,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithOtp = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/auth/complete-profile`;
-    
+    // Redirect to /auth/callback so session is handled properly
+    const redirectUrl = `${window.location.origin}/auth/callback`;
+
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
@@ -158,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(null);
       setProfile(null);
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('[AuthContext] Error signing out:', error);
     }
   };
 

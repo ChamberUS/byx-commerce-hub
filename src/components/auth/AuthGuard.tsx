@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveLegalDocument, useUserAcceptances } from '@/hooks/use-legal';
@@ -18,32 +18,44 @@ export function AuthGuard({
   requireAuth = false,
   requireOnboarding = false,
 }: AuthGuardProps) {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, profileLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isReady, setIsReady] = useState(false);
-  
+  const [decision, setDecision] = useState<'loading' | 'render' | 'redirecting'>('loading');
+  const redirectedRef = useRef(false);
+
+  // Only fetch legal docs when needed (user is logged in and onboarding required)
+  const shouldCheckLegal = requireOnboarding && !!user;
   const { data: termsDoc, isLoading: loadingTerms } = useActiveLegalDocument('terms');
   const { data: acceptances, isLoading: loadingAcceptances } = useUserAcceptances();
 
   useEffect(() => {
-    // Wait for all loading states to complete
-    if (loading || (requireOnboarding && (loadingTerms || loadingAcceptances))) {
-      return;
-    }
+    // Reset on route change
+    redirectedRef.current = false;
+    setDecision('loading');
+  }, [location.pathname]);
 
-    const isPublicAuthRoute = PUBLIC_AUTH_ROUTES.includes(location.pathname);
-    const isTermsRoute = location.pathname === '/auth/terms';
-    const isIntroRoute = location.pathname === '/auth/intro';
+  useEffect(() => {
+    // Wait for auth to resolve
+    if (loading || profileLoading) return;
 
-    // Check if intro was already seen (device-level)
+    // Wait for legal docs if needed
+    if (shouldCheckLegal && (loadingTerms || loadingAcceptances)) return;
+
+    // Prevent double redirects
+    if (redirectedRef.current) return;
+
+    const path = location.pathname;
+    const isPublicAuthRoute = PUBLIC_AUTH_ROUTES.includes(path);
+    const isIntroRoute = path === '/auth/intro';
+    const isTermsRoute = path === '/auth/terms';
     const introSeenLocally = localStorage.getItem(INTRO_SEEN_KEY) === 'true';
-    // Check if user has seen intro (user-level)
     const introSeenByUser = profile?.onboarding_seen_at != null;
 
-    // 1. If route requires auth but user is not logged in
+    // 1. Route requires auth but no user → redirect to login/intro
     if (requireAuth && !user) {
-      // Check if intro should be shown first
+      redirectedRef.current = true;
+      setDecision('redirecting');
       if (!introSeenLocally) {
         navigate('/auth/intro', { replace: true });
       } else {
@@ -52,8 +64,10 @@ export function AuthGuard({
       return;
     }
 
-    // 2. If user is on intro but already saw it
+    // 2. User on intro but already saw it
     if (isIntroRoute && (introSeenLocally || introSeenByUser)) {
+      redirectedRef.current = true;
+      setDecision('redirecting');
       if (user && profile?.onboarding_completo) {
         navigate('/app', { replace: true });
       } else if (user) {
@@ -64,55 +78,55 @@ export function AuthGuard({
       return;
     }
 
-    // 3. Check if user needs to accept new terms version
-    if (requireOnboarding && user && termsDoc) {
+    // 3. Check terms acceptance
+    if (shouldCheckLegal && termsDoc) {
       const hasAcceptedCurrentTerms = acceptances?.some(a => a.document_id === termsDoc.id);
-      
       if (!hasAcceptedCurrentTerms && !isTermsRoute) {
+        redirectedRef.current = true;
+        setDecision('redirecting');
         navigate('/auth/terms', { replace: true });
         return;
       }
     }
 
-    // 4. Check if onboarding is complete
+    // 4. Onboarding incomplete
     if (requireOnboarding && user && !profile?.onboarding_completo) {
-      if (location.pathname !== '/auth/complete-profile' && 
-          location.pathname !== '/auth/terms' &&
-          location.pathname !== '/auth/success') {
+      const allowedPaths = ['/auth/complete-profile', '/auth/terms', '/auth/success'];
+      if (!allowedPaths.includes(path)) {
+        redirectedRef.current = true;
+        setDecision('redirecting');
         navigate('/auth/complete-profile', { replace: true });
         return;
       }
     }
 
-    // 5. If user is fully logged in and on public auth routes, redirect to app
+    // 5. Logged in user on public auth routes → go to app
     if (user && profile?.onboarding_completo && isPublicAuthRoute) {
+      redirectedRef.current = true;
+      setDecision('redirecting');
       navigate('/app', { replace: true });
       return;
     }
 
-    // All checks passed, ready to render
-    setIsReady(true);
+    // All checks passed
+    setDecision('render');
   }, [
-    user, 
-    profile, 
-    loading, 
-    navigate, 
-    location.pathname, 
-    requireAuth, 
-    requireOnboarding, 
-    termsDoc, 
-    acceptances, 
-    loadingTerms, 
-    loadingAcceptances
+    user,
+    profile,
+    loading,
+    profileLoading,
+    navigate,
+    location.pathname,
+    requireAuth,
+    requireOnboarding,
+    shouldCheckLegal,
+    termsDoc,
+    acceptances,
+    loadingTerms,
+    loadingAcceptances,
   ]);
 
-  // Show loading while auth is being verified
-  if (loading || (requireOnboarding && (loadingTerms || loadingAcceptances))) {
-    return <LoadingState fullScreen message="Carregando..." />;
-  }
-
-  // Don't render content until all guards have been checked
-  if (!isReady) {
+  if (decision === 'loading' || decision === 'redirecting') {
     return <LoadingState fullScreen message="Carregando..." />;
   }
 
