@@ -5,6 +5,8 @@ import {
   Loader2, Mail, Shield, MessageCircle, CreditCard,
   ShoppingBag, Store, PackageCheck, ArrowRight, RefreshCw, ArrowLeft
 } from 'lucide-react';
+import signinPanelImg from '@/assets/auth/signin-panel.jpg';
+import signupPanelImg from '@/assets/auth/signup-panel.jpg';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,7 +36,7 @@ const panelContent: Record<Mode, {
       { icon: CreditCard, text: 'Pagamentos locais (Pix/Cartão/Boleto) + AIOS' },
       { icon: MessageCircle, text: 'Chat direto com vendedores' },
     ],
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80',
+    image: signinPanelImg,
   },
   signup: {
     headline: 'Crie sua conta em 1 minuto',
@@ -44,7 +46,7 @@ const panelContent: Record<Mode, {
       { icon: Store, text: 'Sua loja em poucos passos' },
       { icon: PackageCheck, text: 'Acompanhamento do pedido do início ao fim' },
     ],
-    image: 'https://images.unsplash.com/photo-1556740758-90de940a6084?w=1200&q=80',
+    image: signupPanelImg,
   },
 };
 
