@@ -10,6 +10,7 @@ import { VerifiedStoresSection } from '@/components/marketplace/VerifiedStoresSe
 import { TrustSignals } from '@/components/marketplace/TrustSignals';
 import { CryptoUSPBanner } from '@/components/marketplace/CryptoUSPBanner';
 import { SponsoredCarousel, DealsCarousel, TrendingCarousel } from '@/components/marketplace/CarouselSection';
+import { HeroCarousel } from '@/components/marketplace/HeroCarousel';
 import { WalletMiniWidget } from '@/components/wallet/WalletMiniWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/hooks/use-products';
@@ -93,40 +94,12 @@ export default function Home() {
         'max-w-7xl mx-auto px-4 py-6',
         getSection()
       )}>
-        {/* Welcome Banner - MOBILE E DESKTOP */}
-        <section className={cn(
-          'rounded-2xl overflow-hidden border',
-          'bg-gradient-to-br from-primary/10 via-primary/5 to-transparent',
-          'border-primary/10'
-        )}>
-          <div className={cn(
-            'p-4 md:p-6',
-            'flex flex-col md:flex-row md:items-center md:justify-between gap-4'
-          )}>
-            <div className="flex-1">
-              <h1 className="text-xl md:text-2xl font-bold mb-1">
-                Olá, {firstName}! 👋
-              </h1>
-              <p className="text-sm md:text-base text-muted-foreground">
-                Descubra produtos incríveis no marketplace BYX
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
-              <Button asChild className="w-full sm:w-auto">
-                <Link to="/app/search">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Explorar Produtos
-                </Link>
-              </Button>
-              <Button variant="outline" asChild className="w-full sm:w-auto">
-                <Link to="/app/orders">
-                  <Package className="mr-2 h-4 w-4" />
-                  Meus Pedidos
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
+        {/* Hero Carousel - Patrocínios, Destaques, Ofertas */}
+        <HeroCarousel
+          featuredProducts={featuredProducts || []}
+          dealsProducts={dealsProducts || []}
+          userName={firstName}
+        />
 
         {/* Banner AIOS (melhorado) */}
         <CryptoUSPBanner />
